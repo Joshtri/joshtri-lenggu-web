@@ -17,6 +17,7 @@ import {
 } from "@heroui/react";
 import { ReactNode, useEffect, useMemo, useState } from "react";
 import { EllipsisIcon, FileText } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import SearchBar from "@/components/ui/SearchBar";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
@@ -26,23 +27,47 @@ import { PageHeader } from "./Common/PageHeader";
 import {
   createActionButtons,
   createAddButton,
+  createAddButtonFromConfig,
   AddButtonConfig,
   ActionButtonConfig,
 } from "./Button/ActionButtons";
 import { ErrorState } from "./Common/ErrorState";
 import EmptyState from "./Common/EmptyState";
 
-interface Column {
+interface Column<T = unknown> {
   key: string;
   label: string;
   align?: "start" | "center" | "end";
-  value?: (item: Row) => ReactNode; // Optional value renderer
+  value?: (item: T) => ReactNode; // Type-safe value renderer
 }
+
+// Helper type: Makes defining columns super simple!
+// Usage: const columns: Columns<Post> = [...]
+export type Columns<T> = Array<{
+  key: string;
+  label: string;
+  align?: "start" | "center" | "end";
+  value?: (item: T) => ReactNode;
+}>;
 
 interface Row {
   key: string;
   [key: string]: string | number | boolean | ReactNode | undefined;
 }
+
+// Helper type to extract data from API response
+// Supports multiple formats:
+// - T[] (direct array)
+// - { data: T[] } (nested once)
+// - { data?: T[] } (nested once, optional)
+// - { data: { data: T[] } } (nested twice)
+// - { data?: { data?: T[] } } (nested twice, optional)
+type DataExtractor<T> =
+  | T[]
+  | { data: T[] }
+  | { data?: T[] }
+  | { data: { data: T[] } }
+  | { data?: { data?: T[] } };
 
 interface OptionsMenuItem {
   key: string;
@@ -59,7 +84,7 @@ interface OptionsMenuItem {
   onPress?: () => void;
 }
 
-interface ListGridProps {
+interface ListGridProps<T = unknown> {
   title: string;
   description?: string;
   breadcrumbs?: { label: string; href?: string }[];
@@ -73,10 +98,11 @@ interface ListGridProps {
 
   searchPlaceholder?: string;
   onSearch?: (value: string) => void;
-  columns: Column[];
+  columns: Column<T>[];
 
-  // NEW! Auto-mapping: pass raw data array instead of manually mapping rows
-  data?: unknown[];
+  // NEW! Auto-mapping: pass raw data array or API response
+  // Supports: T[], { data: T[] }, or { data: { data: T[] } }
+  data?: DataExtractor<T>;
   keyField?: string; // Field to use as React key (default: "id")
   idField?: string; // Field to use as id for actions (default: "id")
   nameField?: string; // Field to use in delete confirmation (default: "name")
@@ -94,12 +120,17 @@ interface ListGridProps {
   showPagination?: boolean;
   isMobile?: boolean;
 
+  // External pagination control (optional)
+  totalCount?: number; // Total number of items (for server-side pagination)
+  currentPage?: number; // Controlled page number
+  onPageChange?: (page: number) => void; // Controlled page change handler
+
   // Delete confirmation
   deleteConfirmTitle?: string;
-  deleteConfirmMessage?: (item: unknown) => string;
+  deleteConfirmMessage?: (item: T) => string;
 }
 
-export function ListGrid({
+export function ListGrid<T = unknown>({
   title,
   description,
   breadcrumbs,
@@ -123,20 +154,66 @@ export function ListGrid({
   pageSize = 10,
   showPagination = true,
   isMobile: isMobileProp,
+  totalCount: externalTotalCount,
+  currentPage: externalCurrentPage,
+  onPageChange: externalOnPageChange,
   deleteConfirmTitle = "Konfirmasi Hapus",
-  deleteConfirmMessage = (item: unknown) =>
+  deleteConfirmMessage = (item: T) =>
     `Apakah Anda yakin ingin menghapus "${
       (item as { name?: string })?.name || "item ini"
     }"?`,
-}: ListGridProps) {
+}: ListGridProps<T>) {
   const isMobileDevice = useMediaQuery("maxWidth: 768px");
   const isMobile = isMobileProp ?? isMobileDevice;
+
+  // Helper: Extract array from API response
+  const extractDataArray = (input: DataExtractor<T> | undefined): T[] => {
+    if (!input) return [];
+
+    // Case 1: Already an array
+    if (Array.isArray(input)) {
+      return input;
+    }
+
+    // Case 2: { data: T[] } or { data?: T[] } or { data: { data: T[] } }
+    if ('data' in input) {
+      const nested = input.data;
+
+      // Case 2a: data is undefined or null
+      if (!nested) {
+        return [];
+      }
+
+      // Case 2b: { data: T[] }
+      if (Array.isArray(nested)) {
+        return nested;
+      }
+
+      // Case 2c: { data: { data: T[] } } or { data: { data?: T[] } }
+      if (typeof nested === 'object' && 'data' in nested) {
+        const deepNested = (nested as { data?: unknown }).data;
+
+        if (!deepNested) {
+          return [];
+        }
+
+        if (Array.isArray(deepNested)) {
+          return deepNested as T[];
+        }
+      }
+    }
+
+    return [];
+  };
 
   // Auto-transform data to rows if data prop is provided
   const rows = useMemo(() => {
     if (data) {
+      // Extract array from various API response formats
+      const dataArray = extractDataArray(data);
+
       // Automatically map data array to rows
-      return data.map((item) => {
+      return dataArray.map((item) => {
         const record = item as Record<string, string | number | boolean>;
         return {
           key: String(record[keyField] ?? ""),
@@ -154,7 +231,11 @@ export function ListGrid({
   const [searchQuery, setSearchQuery] = useState("");
   const [sortKey, setSortKey] = useState<string>("");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [internalCurrentPage, setInternalCurrentPage] = useState(1);
+
+  // Use external or internal pagination state
+  const currentPage = externalCurrentPage ?? internalCurrentPage;
+  const onPageChange = externalOnPageChange ?? setInternalCurrentPage;
 
   // Delete confirmation dialog state
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -164,10 +245,6 @@ export function ListGrid({
   } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const onPageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
   const handleSort = (key: string) => {
     if (sortKey === key) {
       setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
@@ -175,7 +252,7 @@ export function ListGrid({
       setSortKey(key);
       setSortDirection("asc");
     }
-    setCurrentPage(1);
+    onPageChange(1);
   };
 
   // Open delete confirmation dialog
@@ -201,23 +278,87 @@ export function ListGrid({
     }
   };
 
+  // Get Next.js router for auto-routing
+  const router = useRouter();
+
+  // Process action buttons to convert auto-route handlers to router.push
+  const processedActionButtons = useMemo(() => {
+    if (!actionButtons) return null;
+
+    const processed = { ...actionButtons };
+
+    // Import helper functions
+    const isAutoRouteHandler = (handler: unknown): boolean => {
+      return (
+        typeof handler === "function" &&
+        "__autoRoute" in handler &&
+        (handler as { __autoRoute?: unknown }).__autoRoute !== undefined
+      );
+    };
+
+    const getAutoRoute = (
+      handler: { __autoRoute: { basePath: string; suffix?: string } },
+      id: string
+    ): string => {
+      const { basePath, suffix } = handler.__autoRoute;
+      const normalizedBase = basePath.replace(/\/$/, "");
+      return suffix ? `${normalizedBase}/${id}${suffix}` : `${normalizedBase}/${id}`;
+    };
+
+    // Process show button
+    if (processed.show?.onClick && isAutoRouteHandler(processed.show.onClick)) {
+      const originalHandler = processed.show.onClick as {
+        __autoRoute: { basePath: string; suffix?: string };
+      };
+      processed.show = {
+        ...processed.show,
+        onClick: (id: string) => {
+          const route = getAutoRoute(originalHandler, id);
+          router.push(route);
+        },
+      };
+    }
+
+    // Process edit button
+    if (processed.edit?.onClick && isAutoRouteHandler(processed.edit.onClick)) {
+      const originalHandler = processed.edit.onClick as {
+        __autoRoute: { basePath: string; suffix?: string };
+      };
+      processed.edit = {
+        ...processed.edit,
+        onClick: (id: string) => {
+          const route = getAutoRoute(originalHandler, id);
+          router.push(route);
+        },
+      };
+    }
+
+    return processed;
+  }, [actionButtons, router]);
+
   // Create action buttons renderer
   const renderActions = useMemo(() => {
-    if (actionButtons) {
-      return createActionButtons(actionButtons, openDeleteDialog);
+    if (processedActionButtons) {
+      return createActionButtons(processedActionButtons, openDeleteDialog);
     }
 
     return null;
-  }, [actionButtons]);
+  }, [processedActionButtons]);
 
-  // Create add button
+  // Create add button (support both old and new way)
   const renderAddButton = useMemo(() => {
+    // New way: from actionButtons.add
+    if (actionButtons?.add) {
+      return createAddButtonFromConfig(actionButtons);
+    }
+
+    // Old way: from separate addButton prop (deprecated)
     if (addButton) {
       return createAddButton(addButton);
     }
 
     return null;
-  }, [addButton]);
+  }, [actionButtons, addButton]);
 
   // Transform rows to include column values and actions
   const transformedRows = useMemo(() => {
@@ -236,7 +377,7 @@ export function ListGrid({
 
       // Add action buttons if configured
       if (renderActions) {
-        transformedRow.actions = renderActions(row);
+        transformedRow.actions = renderActions(row as never);
       }
 
       return transformedRow;
@@ -271,16 +412,28 @@ export function ListGrid({
     return filtered;
   }, [transformedRows, searchQuery, sortKey, sortDirection]);
 
-  const totalPages = Math.ceil(filteredRows.length / pageSize);
-  const paginatedRows = useMemo(() => {
-    const startIndex = (currentPage - 1) * pageSize;
+  // Use external totalCount if provided (for server-side pagination), otherwise calculate from filtered rows
+  const totalPages = externalTotalCount
+    ? Math.ceil(externalTotalCount / pageSize)
+    : Math.ceil(filteredRows.length / pageSize);
 
+  const paginatedRows = useMemo(() => {
+    // If using external pagination (server-side), don't slice - data is already paginated
+    if (externalTotalCount !== undefined) {
+      return filteredRows;
+    }
+
+    // Client-side pagination
+    const startIndex = (currentPage - 1) * pageSize;
     return filteredRows.slice(startIndex, startIndex + pageSize);
-  }, [filteredRows, currentPage, pageSize]);
+  }, [filteredRows, currentPage, pageSize, externalTotalCount]);
 
   useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, rows]);
+    // Only reset page if not externally controlled
+    if (!externalOnPageChange) {
+      setInternalCurrentPage(1);
+    }
+  }, [searchQuery, rows, externalOnPageChange]);
 
   const renderMobileCard = (item: Row, _index: number) => {
     return (
@@ -406,6 +559,8 @@ export function ListGrid({
       </div>
     );
   }
+
+  console.log('check empty  conditon', empty)
   return (
     <>
       <div className="p-4 md:p-6 space-y-4 md:space-y-6">
@@ -438,7 +593,16 @@ export function ListGrid({
           ) : (
             <SkeletonTable columns={columns.length} rows={pageSize} />
           )
-        ) : filteredRows.length === 0 ? (
+        )
+        : rows.length === 0 ? (
+          // CASE: No data available
+          <EmptyState
+            title="Tidak ada data"
+            description="Belum ada data yang tersedia."
+            icon={<FileText className="w-12 h-12" />}
+          />
+        )
+        : filteredRows.length === 0 ? (
           empty ?? (
             // <div className="text-center py-12">
             //   <div className="text-gray-400 text-sm">Data kosong.</div>
