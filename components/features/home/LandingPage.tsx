@@ -1,27 +1,68 @@
 "use client";
 
 import { Card, CardBody } from "@heroui/react";
-import { BookHeart, Code2, ArrowRight, Sparkles } from "lucide-react";
+import { BookHeart, Code2, Zap, Palette, ArrowRight, Sparkles, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { textToSlug } from "@/lib/slug";
 
-const categories = [
-  {
-    title: "Personal Blog",
-    description: "My personal thoughts, life experiences, and reflections on various topics",
-    icon: BookHeart,
-    href: "/blog-personal",
-    stats: "12 Articles",
-  },
-  {
-    title: "Technology",
-    description: "Deep dives into tech trends, tutorials, and insights on modern development",
-    icon: Code2,
-    href: "/blog-teknologi",
-    stats: "18 Articles",
-  },
-];
+interface TypeWithCount {
+  id: string;
+  name: string;
+  description: string | null;
+  postCount: number;
+}
+
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  "personal-blog": BookHeart,
+  "personal": BookHeart,
+  "technology": Code2,
+  "teknologi": Code2,
+  "tutorial": Zap,
+  "design": Palette,
+};
 
 export function LandingPage() {
+  const [categories, setCategories] = useState<(TypeWithCount & { icon: React.ComponentType<{ className?: string }> })[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [totalArticles, setTotalArticles] = useState(0);
+
+  useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        const response = await fetch("/api/public/types");
+        const result = await response.json();
+
+        if (result.success) {
+          const typesWithIcons = result.data.map(
+            (type: TypeWithCount) => ({
+              ...type,
+              slug: textToSlug(type.name),
+              icon:
+                iconMap[textToSlug(type.name)] ||
+                iconMap[type.name.toLowerCase()] ||
+                BookHeart,
+            })
+          );
+
+          setCategories(typesWithIcons);
+
+          const total = typesWithIcons.reduce(
+            (sum: number, type: TypeWithCount) => sum + type.postCount,
+            0
+          );
+          setTotalArticles(total);
+        }
+      } catch (error) {
+        console.error("Error fetching types:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTypes();
+  }, []);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
@@ -38,7 +79,7 @@ export function LandingPage() {
               </div> */}
             </div>
 
-            <h1 className="text-6xl sm:text-7xl lg:text-8xl font-bold mb-8 leading-none tracking-tight text-gray-900">
+            <h1 className="text-6xl sm:text-7xl lg:tex  t-8xl font-bold mb-8 leading-none tracking-tight text-gray-900">
               Stories &<br />
               <span className="relative inline-block">
                 Knowledge
@@ -53,12 +94,24 @@ export function LandingPage() {
             {/* Stats with dashed separators */}
             <div className="flex flex-wrap gap-8 justify-center items-center text-sm text-gray-600">
               <div className="text-center">
-                <div className="text-3xl font-bold text-gray-900 mb-1">30+</div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">
+                  {loading ? (
+                    <Loader2 className="h-8 w-8 animate-spin inline" />
+                  ) : (
+                    `${totalArticles}${totalArticles > 0 ? "+" : ""}`
+                  )}
+                </div>
                 <div className="text-xs uppercase tracking-wider">Articles</div>
               </div>
               <div className="w-px h-12 border-l-2 border-dashed border-gray-300"></div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-gray-900 mb-1">2</div>
+                <div className="text-3xl font-bold text-gray-900 mb-1">
+                  {loading ? (
+                    <Loader2 className="h-8 w-8 animate-spin inline" />
+                  ) : (
+                    categories.length
+                  )}
+                </div>
                 <div className="text-xs uppercase tracking-wider">Categories</div>
               </div>
             </div>
@@ -78,50 +131,58 @@ export function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {categories.map((category) => {
-              const Icon = category.icon;
-              return (
-                <Link key={category.href} href={category.href}>
-                  <div className="group relative h-full border-2 border-dashed border-gray-300 rounded-lg p-10 hover:border-gray-900 hover:bg-gray-50 transition-all duration-300 cursor-pointer">
-                    {/* Decorative corner accents */}
-                    <div className="absolute top-3 left-3 w-8 h-8 border-t-2 border-l-2 border-gray-900 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div className="absolute bottom-3 right-3 w-8 h-8 border-b-2 border-r-2 border-gray-900 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
+              {categories.map((category) => {
+                const Icon = category.icon;
+                const href = `/${category.slug}`;
+                return (
+                  <Link key={category.id} href={href}>
+                    <div className="group relative h-full border-2 border-dashed border-gray-300 rounded-lg p-10 hover:border-gray-900 hover:bg-gray-50 transition-all duration-300 cursor-pointer">
+                      {/* Decorative corner accents */}
+                      <div className="absolute top-3 left-3 w-8 h-8 border-t-2 border-l-2 border-gray-900 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      <div className="absolute bottom-3 right-3 w-8 h-8 border-b-2 border-r-2 border-gray-900 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
-                    <div className="flex flex-col h-full">
-                      {/* Icon */}
-                      <div className="mb-6">
-                        <div className="inline-flex items-center justify-center w-16 h-16 border-2 border-dashed border-gray-400 rounded-full group-hover:border-gray-900 group-hover:rotate-90 transition-all duration-300">
-                          <Icon className="h-7 w-7 text-gray-900" />
+                      <div className="flex flex-col h-full">
+                        {/* Icon */}
+                        <div className="mb-6">
+                          <div className="inline-flex items-center justify-center w-16 h-16 border-2 border-dashed border-gray-400 rounded-full group-hover:border-gray-900 group-hover:rotate-90 transition-all duration-300">
+                            <Icon className="h-7 w-7 text-gray-900" />
+                          </div>
                         </div>
-                      </div>
 
-                      {/* Content */}
-                      <h3 className="text-3xl font-bold text-gray-900 mb-4 tracking-tight">
-                        {category.title}
-                      </h3>
+                        {/* Content */}
+                        <h3 className="text-3xl font-bold text-gray-900 mb-4 tracking-tight">
+                          {category.name}
+                        </h3>
 
-                      <p className="text-gray-600 mb-8 leading-relaxed font-light flex-grow">
-                        {category.description}
-                      </p>
+                        <p className="text-gray-600 mb-8 leading-relaxed font-light flex-grow">
+                          {category.description ||
+                            "Explore articles in this category"}
+                        </p>
 
-                      {/* Footer */}
-                      <div className="flex items-center justify-between pt-6 border-t-2 border-dashed border-gray-200">
-                        <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">
-                          {category.stats}
-                        </span>
+                        {/* Footer */}
+                        <div className="flex items-center justify-between pt-6 border-t-2 border-dashed border-gray-200">
+                          <span className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+                            {category.postCount} Articles
+                          </span>
 
-                        <div className="flex items-center gap-2 text-gray-900 font-medium group-hover:gap-4 transition-all">
-                          <span>Explore</span>
-                          <ArrowRight className="h-5 w-5 group-hover:translate-x-2 transition-transform" />
+                          <div className="flex items-center gap-2 text-gray-900 font-medium group-hover:gap-4 transition-all">
+                            <span>Explore</span>
+                            <ArrowRight className="h-5 w-5 group-hover:translate-x-2 transition-transform" />
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
