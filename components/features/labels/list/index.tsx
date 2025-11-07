@@ -6,13 +6,14 @@ import React from "react";
 import { Label } from "../interfaces/labels";
 import { ListGrid } from "@/components/ui/ListGrid";
 import { EyeIcon, PencilIcon, PlusIcon } from "lucide-react";
+import { ACTION_BUTTONS, ADD_BUTTON } from "@/components/ui/Button/ActionButtons";
 
 export default function LabelList() {
   const router = useRouter();
 
-  const { data, isLoading, isError, error } = useLabels();
+  const { data: dataLabels, isLoading, isError, error } = useLabels();
   const deleteLabel = useDeleteLabel();
-  const labels = data?.data || [];
+  // const labels = data?.data || [];
 
   const columns = [
     {
@@ -42,7 +43,6 @@ export default function LabelList() {
     },
   ];
 
-
   const handleDelete = (id: string) => {
     deleteLabel.mutateAsync(Number(id)).then(() => {
       // Router refresh will trigger re-fetch from cache
@@ -56,36 +56,24 @@ export default function LabelList() {
       idField="id"
       title={"Label Management"}
       description={"Manage your labels"}
-      addButton={{
-        label: "Tambah Label",
-        href: "/labels/create",
-        icon: <PlusIcon className="w-4 h-4" />,
-      }}
+      // addButton={{
+      //   label: "Tambah Label",
+      //   href: "/labels/create",
+      //   icon: <PlusIcon className="w-4 h-4" />,
+      // }}
       actionButtons={{
-        show: {
-          label: "View",
-          icon: <EyeIcon className="w-4 h-4" />,
-          onClick: (id) => router.push(`/labels/${id}`),
-        },
-        edit: {
-          label: "Edit",
-          icon: <PencilIcon className="w-4 h-4" />,
-          onClick(id) {
-            router.push(`/labels/${id}/edit`);
-          },
-        },
-        delete: {
-          label: "Delete",
-          onDelete: handleDelete,
-        },
+        add: ADD_BUTTON.CREATE("/labels/create"),
+        show: ACTION_BUTTONS.SHOW((id) => router.push(`/labels/${id}`)),
+        edit: ACTION_BUTTONS.EDIT((id) => router.push(`/labels/${id}/edit`)),
+        delete: ACTION_BUTTONS.DELETE(handleDelete),
       }}
       isError={isError}
       error={error}
       loading={isLoading}
-      empty={labels.length === 0}
+      empty={dataLabels?.data?.length === 0}
       nameField="name"
       searchPlaceholder="Search labels by name, description, or color..."
-      data={labels}
+      data={dataLabels}
       onSearch={(query) => {}}
       columns={columns as never}
       pageSize={10}
