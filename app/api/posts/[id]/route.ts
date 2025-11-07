@@ -10,9 +10,8 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const postId = parseInt(id);
 
-    if (isNaN(postId)) {
+    if (!id || typeof id !== "string") {
       return NextResponse.json(
         {
           success: false,
@@ -25,7 +24,7 @@ export async function GET(
     const post = await db
       .select()
       .from(posts)
-      .where(eq(posts.id, postId))
+      .where(eq(posts.id, id))
       .limit(1);
 
     if (post.length === 0) {
@@ -66,9 +65,8 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params;
-    const postId = parseInt(id);
 
-    if (isNaN(postId)) {
+    if (!id || typeof id !== "string") {
       return NextResponse.json(
         {
           success: false,
@@ -79,14 +77,14 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { slug, title, coverImage, content, excerpt, authorId, labelId } =
+    const { slug, title, coverImage, content, excerpt, authorId, labelId, typeId } =
       body;
 
     // Check if post exists
     const existingPost = await db
       .select()
       .from(posts)
-      .where(eq(posts.id, postId))
+      .where(eq(posts.id, id))
       .limit(1);
 
     if (existingPost.length === 0) {
@@ -127,11 +125,12 @@ export async function PATCH(
     if (excerpt !== undefined) updateData.excerpt = excerpt;
     if (authorId !== undefined) updateData.authorId = authorId;
     if (labelId !== undefined) updateData.labelId = labelId;
+    if (typeId !== undefined) updateData.typeId = typeId;
 
     const updatedPost = await db
       .update(posts)
       .set(updateData)
-      .where(eq(posts.id, postId))
+      .where(eq(posts.id, id))
       .returning();
 
     return NextResponse.json(
@@ -162,9 +161,8 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const postId = parseInt(id);
 
-    if (isNaN(postId)) {
+    if (!id || typeof id !== "string") {
       return NextResponse.json(
         {
           success: false,
@@ -178,7 +176,7 @@ export async function DELETE(
     const existingPost = await db
       .select()
       .from(posts)
-      .where(eq(posts.id, postId))
+      .where(eq(posts.id, id))
       .limit(1);
 
     if (existingPost.length === 0) {
@@ -191,7 +189,7 @@ export async function DELETE(
       );
     }
 
-    await db.delete(posts).where(eq(posts.id, postId));
+    await db.delete(posts).where(eq(posts.id, id));
 
     return NextResponse.json(
       {
