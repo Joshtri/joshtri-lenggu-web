@@ -4,3 +4,4 @@ export * from "./users.schema";
 export * from "./comments.schema";
 export * from "./relations";
 export * from "./columns.helpers";
+export * from "./type.schema";
