@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { posts } from "@/db/schema";
+import { posts, users } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
+import { auth } from "@clerk/nextjs/server";
 
 // GET - Fetch all posts
 export async function GET(request: NextRequest) {
@@ -50,16 +51,64 @@ export async function GET(request: NextRequest) {
 // POST - Create new post
 export async function POST(request: NextRequest) {
   try {
+    // Get authenticated user
+    const { userId } = await auth();
+
+    if (!userId) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized - Please sign in",
+        },
+        { status: 401 }
+      );
+    }
+
+    // TEMPORARY: Hardcode user ID
+    // TODO: Get from database using clerkId later
+    const TEMP_HARDCODED_USER_ID = "user_34mXgMUtSi7IXY6wZLReExxZ1l6";
+
+    // Get user from database using clerkId
+    const user = await db
+      .select()
+      .from(users)
+      .where(eq(users.clerkId, TEMP_HARDCODED_USER_ID))
+      .limit(1);
+
+    if (!user || user.length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Hardcoded user not found in database. Please add user first.",
+        },
+        { status: 404 }
+      );
+    }
+
+    const dbUserId = user[0].id;
+
     const body = await request.json();
-    const { slug, title, coverImage, content, excerpt, authorId, labelId } =
-      body;
+    const { slug, title, coverImage, content, excerpt, labelId, typeId } = body;
+
+    console.log("✅ Received body:", body);
+    console.log("✅ Authenticated clerkId:", userId);
+    console.log("✅ Database userId:", dbUserId);
 
     // Validation
-    if (!slug || !title || !coverImage || !content || !excerpt) {
+    if (!slug || !title || !coverImage || !content || !excerpt || !labelId || !typeId) {
       return NextResponse.json(
         {
           success: false,
           message: "Missing required fields",
+          missingFields: {
+            slug: !slug,
+            title: !title,
+            coverImage: !coverImage,
+            content: !content,
+            excerpt: !excerpt,
+            labelId: !labelId,
+            typeId: !typeId,
+          },
         },
         { status: 400 }
       );
@@ -90,8 +139,9 @@ export async function POST(request: NextRequest) {
         coverImage,
         content,
         excerpt,
-        authorId: authorId || null,
-        labelId: labelId || null,
+        authorId: dbUserId, // Use database user ID
+        labelId: labelId,
+        typeId: typeId,
       })
       .returning();
 
