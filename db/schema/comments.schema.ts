@@ -1,16 +1,18 @@
-import { integer, pgTable, serial, text, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, uuid } from "drizzle-orm/pg-core";
+
+import { sql } from 'drizzle-orm/sql'
+// 👆 Notice the `sql` import here!
 import { timestamps } from "./columns.helpers";
 import { posts } from "./posts.schema";
 import { users } from "./users.schema";
 
-export const comments = pgTable('comments', {
-    id: serial('id').primaryKey().notNull(),
-    content: text('content').notNull(),
-    authorId: integer('author_id').references(() => users.id),
-    postId: integer('post_id').references(() => posts.id),
-    parentId: integer('parent_id'), // For nested comments - self-reference
-    ...timestamps
+export const comments = pgTable("comments", {
+    id: uuid().default(sql`gen_random_uuid()`).primaryKey(),
+    content: text("content").notNull(),
+    authorId: uuid("author_id").references(() => users.id),
+    postId: uuid("post_id").references(() => posts.id),
+    parentId: varchar("parent_id", { length: 40 }),
+    ...timestamps,
 });
 
-// Add the self-reference after table definition
 export type Comments = typeof comments.$inferSelect;
