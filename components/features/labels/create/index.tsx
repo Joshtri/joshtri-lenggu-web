@@ -99,7 +99,7 @@ export default function LabelForm({
               variant="bordered"
               size="sm"
               isDisabled={isSubmitting}
-              onPress={() => router.push("/sys/labels")}
+              onPress={() => router.push("/labels")}
             >
               Cancel
             </Button>
