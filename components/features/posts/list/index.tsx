@@ -1,37 +1,30 @@
 "use client";
 
-import { ListGrid } from "@/components/ui/ListGrid";
+import { ListGrid, Columns } from "@/components/ui/ListGrid";
 import { Badge } from "@/components/ui/Badge";
-// import type { Post } from "@/interfaces/post.types";
-import { useRouter } from "next/navigation";
-// import { useDeletePost } from "@/services/posts.service";
-import { EyeIcon, PencilIcon, PlusIcon } from "lucide-react";
 import Image from "next/image";
 import { Post } from "../interfaces/posts";
 import { useDeletePost, usePosts } from "@/services/postsService";
-import EmptyState from "@/components/ui/Common/EmptyState";
+import { ACTION_BUTTONS, ADD_BUTTON } from "@/components/ui/Button/ActionButtons";
 
 export function PostList() {
-  const router = useRouter();
   const deletePost = useDeletePost();
 
   // Fetch posts using React Query hook
   const { data, isLoading, isError, error } = usePosts();
 
-  // Extract posts array from API response
-  const posts = data?.data || [];
-
-  const columns = [
+  // Type-safe columns - simple & clean!
+  const columns: Columns<Post> = [
     {
       key: "id",
       label: "ID",
-      value: (post: Post) => post.id,
+      value: (post) => post.id,
     },
     {
       key: "coverImage",
       label: "Cover",
       align: "center" as const,
-      value: (post: Post) => (
+      value: (post) => (
         <Image
           src={post.coverImage}
           alt={post.title}
@@ -44,7 +37,7 @@ export function PostList() {
     {
       key: "title",
       label: "Title",
-      value: (post: Post) => (
+      value: (post) => (
         <div className="flex flex-col gap-1">
           <span className="font-semibold text-sm">{post.title}</span>
           <span className="text-xs text-gray-500">{post.slug}</span>
@@ -54,13 +47,13 @@ export function PostList() {
     {
       key: "excerpt",
       label: "Excerpt",
-      value: (post: Post) => <>{post.excerpt}</>,
+      value: (post) => <>{post.excerpt}</>,
     },
     {
       key: "status",
       label: "Status",
       align: "center" as const,
-      value: (post: Post) => {
+      value: (post) => {
         if (post.deletedAt) {
           return <Badge color="danger">Deleted</Badge>;
         }
@@ -73,7 +66,7 @@ export function PostList() {
     {
       key: "createdAt",
       label: "Created",
-      value: (post: Post) => (
+      value: (post) => (
         <span className="text-xs text-gray-500">
           {new Date(post.createdAt).toLocaleDateString("en-US", {
             month: "short",
@@ -91,54 +84,32 @@ export function PostList() {
   ];
 
   const handleDelete = (id: string) => {
-    deletePost.mutateAsync(Number(id)).then(() => {
-      // Router refresh will trigger re-fetch from cache
-      router.refresh();
-    });
+    deletePost.mutateAsync(Number(id));
   };
 
   return (
-    <ListGrid
+    <ListGrid<Post>
       title="Posts Management"
       description="Manage all your blog posts with optimized caching"
-      // breadcrumbs={[{ label: "System", href: "/sys" }, { label: "Posts" }]}
       searchPlaceholder="Search posts by title, slug, or excerpt..."
-      columns={columns as never} // type fix: cast to any if columns type doesn't match expected Column[]
-      onSearch={(query) => {}}
-      data={posts}
+      columns={columns}
+      onSearch={(_query: string) => {}}
+      data={data}
       isError={isError}
       error={error}
       keyField="id"
       idField="id"
       nameField="title"
       loading={isLoading}
-      empty={posts.length === 0}
-      addButton={{
-        label: "Create Post",
-        href: "/posts/create",
-        icon: <PlusIcon className="w-4 h-4" />,
-      }}
       actionButtons={{
-        show: {
-          label: "View",
-          icon: <EyeIcon className="w-4 h-4" />,
-          onClick: (id) => router.push(`/posts/${id}`),
-        },
-        edit: {
-          label: "Edit",
-          icon: <PencilIcon className="w-4 h-4" />,
-          href: `/posts/`,
-        },
-        delete: {
-          label: "Delete",
-          onDelete: handleDelete,
-        },
+        add: ADD_BUTTON.CREATE("/posts/create"),
+        show: ACTION_BUTTONS.SHOW("/posts"),
+        edit: ACTION_BUTTONS.EDIT("/posts"),
+        delete: ACTION_BUTTONS.DELETE(handleDelete),
       }}
       deleteConfirmTitle="Delete Post"
-      deleteConfirmMessage={(item) =>
-        `Are you sure you want to delete "${
-          (item as Post).title
-        }"? This action cannot be undone.`
+      deleteConfirmMessage={(post) =>
+        `Are you sure you want to delete "${post.title}"? This action cannot be undone.`
       }
       pageSize={10}
       showPagination={true}
