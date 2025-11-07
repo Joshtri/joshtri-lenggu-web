@@ -38,7 +38,7 @@ async function fetchPosts(
 }
 
 // Fetch single post
-async function getPost(id: number): Promise<ApiResponse<Post>> {
+async function getPost(id: string | number): Promise<ApiResponse<Post>> {
   const { data } = await apiClient.get<ApiResponse<Post>>(`/posts/${id}`);
   return data;
 }
@@ -56,7 +56,7 @@ async function updatePost({
   id,
   data: postData,
 }: {
-  id: number;
+  id: string | number;
   data: UpdatePostInput;
 }): Promise<ApiResponse<Post>> {
   const { data } = await apiClient.patch<ApiResponse<Post>>(
@@ -67,7 +67,7 @@ async function updatePost({
 }
 
 // Delete post
-async function deletePost(id: number): Promise<ApiResponse<null>> {
+async function deletePost(id: string | number): Promise<ApiResponse<null>> {
   const { data } = await apiClient.delete<ApiResponse<null>>(`/posts/${id}`);
   return data;
 }
@@ -85,11 +85,11 @@ export function usePosts(params?: QueryParams) {
 }
 
 // Hook: Fetch single post
-export function usePost(id: number) {
+export function usePost(id: string | number) {
   return useQuery({
-    queryKey: postsKeys.detail(id),
+    queryKey: postsKeys.detail(id as number),
     queryFn: () => getPost(id),
-    enabled: !!id && id > 0,
+    enabled: !!id,
     staleTime: 5000,
   });
 }
