@@ -39,16 +39,6 @@ export default function PostShow() {
   return (
     <Container>
       <PageHeader
-        breadcrumbs={[
-          {
-            label: "Posts",
-            href: "/sys/posts",
-          },
-          {
-            label: post.title,
-            href: `/sys/posts/${post.id}`,
-          },
-        ]}
         actions={
           <>
             <Button
