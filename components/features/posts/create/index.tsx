@@ -9,20 +9,25 @@ import RichTextEditor, {
 } from "@/components/ui/TextEditor";
 import { TextInput } from "@/components/ui/Inputs/TextInput";
 import { TextareaInput } from "@/components/ui/Inputs/TextareaInput";
+import { SelectInput } from "@/components/ui/Inputs/SelectInput";
+import { ImageUpload } from "@/components/ui/Inputs/ImageUpload";
 import { Button } from "@heroui/react";
 import { Save, X, FileText, Type, Clock, Calendar } from "lucide-react";
-// import { useCreatePost } from "@/services/posts/postsService";
 import { CreatePostInput } from "../interfaces/posts";
 import { useCreatePost } from "@/services/postsService";
+import { useLabels } from "@/services/labelsService";
+import { useTypes } from "@/services/typesService";
+import axios from "axios";
 
 type PostFormData = {
   title: string;
   slug: string;
-  coverImage: string;
+  coverImage: string | File;
   content: string;
   excerpt: string;
   authorId?: number;
-  labelId?: number;
+  labelId?: string;
+  typeId?: string;
 };
 
 export default function PostCreate() {
@@ -39,6 +44,8 @@ export default function PostCreate() {
       coverImage: "",
       content: "",
       excerpt: "",
+      labelId: "",
+      typeId: "",
     },
   });
 
@@ -50,6 +57,13 @@ export default function PostCreate() {
   } = methods;
 
   const createPost = useCreatePost();
+
+  // Fetch labels and types
+  const { data: labelsData, isLoading: labelsLoading } = useLabels();
+  const { data: typesData, isLoading: typesLoading } = useTypes();
+
+  const labels = labelsData?.data || [];
+  const types = typesData?.data || [];
 
   // Watch fields
   const watchedTitle = watch("title");
@@ -96,23 +110,108 @@ export default function PostCreate() {
         !latestContent ||
         latestContent.replace(/<[^>]*>/g, "").trim().length === 0
       ) {
+        alert("Content is required");
         return;
+      }
+
+      if (!data.coverImage) {
+        alert("Cover image is required");
+        return;
+      }
+
+      if (!data.labelId) {
+        alert("Label is required");
+        return;
+      }
+
+      if (!data.typeId) {
+        alert("Type is required");
+        return;
+      }
+
+      let coverImageUrl: string = "";
+
+      // If coverImage is a File object, upload it first
+      if (data.coverImage instanceof File) {
+        console.log("📤 Starting image upload...");
+        console.log("📤 File info:", {
+          name: data.coverImage.name,
+          size: data.coverImage.size,
+          type: data.coverImage.type,
+        });
+
+        const formData = new FormData();
+        formData.append("file", data.coverImage);
+
+        const uploadResponse = await axios.post("/api/upload", formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        console.log("📥 Upload response:", JSON.stringify(uploadResponse.data, null, 2));
+
+        if (!uploadResponse.data.success) {
+          throw new Error(uploadResponse.data.error || "Failed to upload image");
+        }
+
+        // Get fileUrl from response
+        if (uploadResponse.data.fileUrl) {
+          coverImageUrl = uploadResponse.data.fileUrl;
+          console.log("✅ Got fileUrl from response:", coverImageUrl);
+        } else if (uploadResponse.data.fileId) {
+          // Construct URL manually as fallback
+          const endpoint = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT;
+          const projectId = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID;
+          const bucketId = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID;
+          coverImageUrl = `${endpoint}/storage/buckets/${bucketId}/files/${uploadResponse.data.fileId}/view?project=${projectId}&mode=admin`;
+          console.log("✅ Constructed URL from fileId:", coverImageUrl);
+        } else {
+          console.error("❌ No fileUrl or fileId in response:", uploadResponse.data);
+          throw new Error("No file URL or file ID in response");
+        }
+      } else if (typeof data.coverImage === "string") {
+        // If it's already a URL (edit mode)
+        coverImageUrl = data.coverImage;
+        console.log("✅ Using existing URL:", coverImageUrl);
+      } else {
+        console.error("❌ Invalid coverImage type:", typeof data.coverImage);
+        throw new Error("Invalid cover image");
+      }
+
+      console.log("🖼️ Final coverImageUrl:", coverImageUrl);
+
+      // Validate coverImageUrl before creating post
+      if (!coverImageUrl || coverImageUrl.trim() === "") {
+        console.error("❌ coverImageUrl is empty!");
+        throw new Error("Failed to get image URL");
       }
 
       const postData: CreatePostInput = {
         title: data.title,
         slug: data.slug,
-        coverImage: data.coverImage,
+        coverImage: coverImageUrl,
         content: latestContent,
         excerpt: data.excerpt,
-        authorId: data.authorId,
-        labelId: data.labelId,
+        labelId: data.labelId as unknown as number,
+        typeId: data.typeId as unknown as number,
       };
 
+      console.log("📤 Sending post data:", JSON.stringify(postData, null, 2));
+      console.log("📤 coverImage value:", postData.coverImage);
+      console.log("📤 coverImage type:", typeof postData.coverImage);
+      console.log("📤 coverImage length:", postData.coverImage?.length);
+
       await createPost.mutateAsync(postData);
-      router.push("/sys/posts");
+      console.log("✅ Post created successfully!");
+      router.push("/posts");
     } catch (error) {
       console.error("Error creating post:", error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to create post. Please try again."
+      );
     }
   };
 
@@ -145,7 +244,7 @@ export default function PostCreate() {
               variant="bordered"
               size="sm"
               isDisabled={isSubmitting}
-              onPress={() => router.push("/sys/posts")}
+              onPress={() => router.push("/posts")}
             >
               Cancel
             </Button>
@@ -156,7 +255,7 @@ export default function PostCreate() {
               onPress={handleSubmit(onSubmit)}
               startContent={!isSubmitting && <Save className="h-4 w-4" />}
             >
-              {isSubmitting ? "Saving..." : "Save Post"}
+              {isSubmitting ? "Uploading & Saving..." : "Save Post"}
             </Button>
           </>
         }
@@ -298,19 +397,35 @@ export default function PostCreate() {
                       }}
                     />
 
-                    <TextInput
+                    <ImageUpload
                       name="coverImage"
-                      label="Cover Image URL"
-                      placeholder="https://example.com/image.jpg"
+                      label="Cover Image"
                       required
-                      type="url"
-                      validation={{
-                        required: "Cover image is required",
-                        pattern: {
-                          value: /^https?:\/\/.+/,
-                          message: "Must be a valid URL",
-                        },
-                      }}
+                      helperText="Upload an image (max 5MB)"
+                    />
+
+                    <SelectInput
+                      name="labelId"
+                      label="Label"
+                      placeholder="Select a label"
+                      options={labels.map((label) => ({
+                        label: label.name,
+                        value: label.id,
+                      }))}
+                      required
+                      disabled={labelsLoading}
+                    />
+
+                    <SelectInput
+                      name="typeId"
+                      label="Type"
+                      placeholder="Select a type"
+                      options={types.map((type) => ({
+                        label: type.name,
+                        value: type.id,
+                      }))}
+                      required
+                      disabled={typesLoading}
                     />
 
                     <TextareaInput
