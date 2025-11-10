@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { posts } from "@/db/schema";
+import { posts, comments } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 // GET - Fetch single post by ID
@@ -189,6 +189,10 @@ export async function DELETE(
       );
     }
 
+    // Delete related comments first (cascade delete)
+    await db.delete(comments).where(eq(comments.postId, id));
+
+    // Then delete the post
     await db.delete(posts).where(eq(posts.id, id));
 
     return NextResponse.json(
