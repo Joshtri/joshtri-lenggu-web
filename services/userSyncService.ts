@@ -98,7 +98,7 @@ export async function updateUserRole(clerkId: string, role: "ADMIN" | "VISITOR")
   const updated = await db
     .update(users)
     .set({
-      role: role as any, // VARCHAR type
+      role: role as never, // VARCHAR type
       updatedAt: new Date(),
     })
     .where(eq(users.clerkId, clerkId))
