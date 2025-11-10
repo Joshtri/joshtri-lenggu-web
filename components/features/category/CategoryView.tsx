@@ -46,33 +46,33 @@ export default function CategoryView({
   const Icon = iconMap[slug] || BookHeart;
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-950">
       {/* Header Section */}
-      <section className="border-b-2 border-dashed border-gray-300">
+      <section className="border-b-2 border-dashed border-gray-300 dark:border-gray-700">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <Button
             isIconOnly
             variant="light"
             onPress={() => router.back()}
-            className="mb-6"
+            className="mb-6 dark:text-gray-200"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
 
           <div className="flex items-start gap-6 mb-6">
-            <div className="inline-flex items-center justify-center w-24 h-24 border-2 border-dashed border-gray-400 rounded-full">
-              <Icon className="h-12 w-12 text-gray-900" />
+            <div className="inline-flex items-center justify-center w-24 h-24 border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-full">
+              <Icon className="h-12 w-12 text-gray-900 dark:text-white" />
             </div>
             <div>
-              <h1 className="text-5xl font-bold text-gray-900 mb-2 tracking-tight">
+              <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
                 {type.name}
               </h1>
               {type.description && (
-                <p className="text-xl text-gray-600 font-light">
+                <p className="text-xl text-gray-600 dark:text-gray-400 font-light">
                   {type.description}
                 </p>
               )}
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
                 {posts.length} article{posts.length !== 1 ? "s" : ""}
               </p>
             </div>
@@ -84,7 +84,7 @@ export default function CategoryView({
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {posts.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-xl text-gray-600 font-light">
+            <p className="text-xl text-gray-600 dark:text-gray-400 font-light">
               No articles yet in this category
             </p>
           </div>
@@ -92,10 +92,10 @@ export default function CategoryView({
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {posts.map((post) => (
               <Link key={post.id} href={`/${slug}/${post.slug}`}>
-                <div className="group relative h-full border-2 border-dashed border-gray-300 rounded-lg overflow-hidden hover:border-gray-900 transition-all duration-300 cursor-pointer flex flex-col">
+                <div className="group relative h-full border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden hover:border-gray-900 dark:hover:border-gray-400 transition-all duration-300 cursor-pointer flex flex-col bg-white dark:bg-gray-900">
                   {/* Cover Image */}
                   {post.coverImage && (
-                    <div className="relative w-full h-48 overflow-hidden bg-gray-200">
+                    <div className="relative w-full h-48 overflow-hidden bg-gray-200 dark:bg-gray-800">
                       <Image
                         src={post.coverImage}
                         alt={post.title}
@@ -107,18 +107,18 @@ export default function CategoryView({
 
                   {/* Content */}
                   <div className="flex-1 flex flex-col p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                       {post.title}
                     </h3>
 
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2 flex-grow font-light">
+                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow font-light">
                       {post.excerpt}
                     </p>
 
                     {/* Footer */}
-                    <div className="flex items-center justify-between pt-4 border-t-2 border-dashed border-gray-200">
+                    <div className="flex items-center justify-between pt-4 border-t-2 border-dashed border-gray-200 dark:border-gray-700">
                       {post.createdAt && (
-                        <span className="text-xs text-gray-500 uppercase tracking-wider">
+                        <span className="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-wider">
                           {new Date(post.createdAt).toLocaleDateString("en-US", {
                             year: "numeric",
                             month: "short",
@@ -126,7 +126,7 @@ export default function CategoryView({
                           })}
                         </span>
                       )}
-                      <div className="flex items-center gap-2 text-gray-900 group-hover:gap-3 transition-all">
+                      <div className="flex items-center gap-2 text-gray-900 dark:text-white group-hover:gap-3 transition-all">
                         <Eye className="h-4 w-4" />
                       </div>
                     </div>
