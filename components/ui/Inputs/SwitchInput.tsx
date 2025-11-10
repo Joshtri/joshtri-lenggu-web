@@ -69,7 +69,11 @@ export const SwitchInput = ({
         name={name}
         render={({ field }) => (
           <Switch
-            classNames={classNames}
+            classNames={{
+              ...classNames,
+              label: `dark:text-gray-300 ${classNames?.label || ""}`,
+              wrapper: `dark:bg-gray-700 ${classNames?.wrapper || ""}`,
+            }}
             color={color}
             endContent={endContent}
             isDisabled={disabled}
