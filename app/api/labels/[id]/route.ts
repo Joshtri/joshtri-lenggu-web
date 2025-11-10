@@ -10,9 +10,10 @@ export async function GET(
 ) {
     try {
         const { id } = await params;
-        const labelId = parseInt(id);
+        const labelId = id;
 
-        if (isNaN(labelId)) {
+        //falsy -> said if this is empty string, null, undefined, 0, false
+        if (!labelId) {
             return NextResponse.json(
                 { success: false, message: "Invalid label ID" },
                 { status: 400 }
@@ -56,9 +57,9 @@ export async function PATCH(
 ) {
     try {
         const { id } = await params;
-        const labelId = parseInt(id);
+        const labelId = (id);
 
-        if (isNaN(labelId)) {
+        if (!labelId) {
             return NextResponse.json(
                 { success: false, message: "Invalid label ID" },
                 { status: 400 }
@@ -118,9 +119,9 @@ export async function DELETE(
 ) {
     try {
         const { id } = await params;
-        const labelId = parseInt(id);
+        const labelId = id;
 
-        if (isNaN(labelId)) {
+        if (!labelId) {
             return NextResponse.json(
                 { success: false, message: "Invalid label ID" },
                 { status: 400 }
