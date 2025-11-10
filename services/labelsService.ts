@@ -16,7 +16,7 @@ export const labelsKeys = {
     list: (params?: QueryParams) =>
         [...labelsKeys.lists(), params] as const,
     details: () => [...labelsKeys.all, "detail"] as const,
-    detail: (id: number) => [...labelsKeys.details(), id] as const,
+    detail: (id: string) => [...labelsKeys.details(), id] as const,
 };
 
 
@@ -33,7 +33,7 @@ async function getLabels(
 }
 
 // Fetch single post
-async function getLabel(id: number): Promise<ApiResponse<Label>> {
+async function getLabel(id: string): Promise<ApiResponse<Label>> {
     const { data } = await apiClient.get<ApiResponse<Label>>(`/labels/${id}`);
     return data;
 }
@@ -51,7 +51,7 @@ async function updateLabel({
     id,
     data: labelData,
 }: {
-    id: number;
+    id: string;
     data: UpdateLabelInput;
 }): Promise<ApiResponse<Label>> {
     const { data } = await apiClient.patch<ApiResponse<Label>>(
@@ -62,7 +62,7 @@ async function updateLabel({
 }
 
 // Delete label
-async function deleteLabel(id: number): Promise<ApiResponse<null>> {
+async function deleteLabel(id: string): Promise<ApiResponse<null>> {
     const { data } = await apiClient.delete<ApiResponse<null>>(`/labels/${id}`);
     return data;
 }
@@ -80,7 +80,7 @@ export function useLabels(params?: QueryParams) {
 }
 
 
-export function useLabel(id: number) {
+export function useLabel(id: string) {
     return useQuery({
         queryKey: labelsKeys.detail(id),
         queryFn: () => getLabel(id),
@@ -96,7 +96,7 @@ export function useLabel(id: number) {
 // Export for use with React 19.2 useOptimistic hook
 export function getOptimisticLabel(input: CreateLabelInput): Label {
     return {
-        id: -Date.now(),
+        id: (-Date.now()).toString(),
         name: input.name,
         color: input.color,
         description: input.description ?? null,
@@ -245,7 +245,7 @@ export function useDeleteLabel() {
 
     return useMutation({
         mutationFn: deleteLabel,
-        onMutate: async (id: number) => {
+        onMutate: async (id: string) => {
             await queryClient.cancelQueries({ queryKey: labelsKeys.lists() });
 
             const previousLabels = queryClient.getQueryData(labelsKeys.lists());
