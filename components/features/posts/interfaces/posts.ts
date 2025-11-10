@@ -6,20 +6,20 @@ export interface Post  extends BaseEntity{
     coverImage: string;
     content: string;
     excerpt: string;
-    authorId: number | null;
-    labelId: number | null;
-    typeId: number | null;
+    authorId: string | null;
+    labelId: string | null;
+    typeId: string | null;
 }
 
-export interface CreatePostInput {
+export interface CreatePostInput extends Pick<BaseEntity, "id"> {
     slug: string;
     title: string;
     coverImage: string;
     content: string;
     excerpt: string;
-    authorId?: number;
-    labelId?: number;
-    typeId?: number;
+    authorId?: string;
+    labelId?: string;
+    typeId?: string;
 }
 
 export interface UpdatePostInput {
