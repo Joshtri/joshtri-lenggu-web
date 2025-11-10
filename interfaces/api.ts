@@ -12,7 +12,7 @@ export interface ApiResponse<T> {
 
 
 export interface BaseEntity {
-    id: number;
+    id: string;
     createdAt: Date;
     updatedAt: Date | null;
     deletedAt: Date | null;
