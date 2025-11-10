@@ -4,14 +4,14 @@ import { ListGrid, Columns } from "@/components/ui/ListGrid";
 import { Badge } from "@/components/ui/Badge";
 import Image from "next/image";
 import { Post } from "../interfaces/posts";
-import { useDeletePost, usePosts } from "@/services/postsService";
-import { ACTION_BUTTONS, ADD_BUTTON } from "@/components/ui/Button/ActionButtons";
+import { useDeletePost } from "@/services/postsService";
+import {
+  ACTION_BUTTONS,
+  ADD_BUTTON,
+} from "@/components/ui/Button/ActionButtons";
 
 export function PostList() {
   const deletePost = useDeletePost();
-
-  // Fetch posts using React Query hook
-  const { data, isLoading, isError, error } = usePosts();
 
   // Type-safe columns - simple & clean!
   const columns: Columns<Post> = [
@@ -84,7 +84,7 @@ export function PostList() {
   ];
 
   const handleDelete = (id: string) => {
-    deletePost.mutateAsync(Number(id));
+    return deletePost.mutateAsync(id);
   };
 
   return (
@@ -94,13 +94,8 @@ export function PostList() {
       searchPlaceholder="Search posts by title, slug, or excerpt..."
       columns={columns}
       onSearch={(_query: string) => {}}
-      data={data}
-      isError={isError}
-      error={error}
-      keyField="id"
-      idField="id"
+      resourcePath="/posts"
       nameField="title"
-      loading={isLoading}
       actionButtons={{
         add: ADD_BUTTON.CREATE("/posts/create"),
         show: ACTION_BUTTONS.SHOW("/posts"),
