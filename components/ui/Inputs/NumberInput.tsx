@@ -3,7 +3,16 @@ import { useFormContext, Controller } from "react-hook-form";
 
 import { FormFieldWrapper } from "../Form/FormFieldWrapper";
 
-// import { FormFieldWrapper } from "./FormFieldWrapper";
+interface NumberInputProps {
+  name: string;
+  label?: string;
+  min?: number;
+  max?: number;
+  disabled?: boolean;
+  required?: boolean;
+  placeholder?: string;
+  description?: string;
+}
 
 export const NumberInput = ({
   name,
@@ -12,14 +21,9 @@ export const NumberInput = ({
   max,
   disabled = false,
   required = true,
-}: {
-  name: string;
-  label?: string;
-  min?: number;
-  max?: number;
-  disabled?: boolean;
-  required?: boolean;
-}) => {
+  placeholder,
+  description
+}: NumberInputProps) => {
   const {
     control,
     formState: { errors },
@@ -34,12 +38,20 @@ export const NumberInput = ({
         render={({ field }) => (
           <HeroNumberInput
             aria-label={label}
+            classNames={{
+              input: "dark:text-white",
+              inputWrapper: "dark:bg-gray-800 dark:border-gray-700",
+              label: "dark:text-gray-300",
+              description: "dark:text-gray-400",
+            }}
+            description={description}
             errorMessage={error}
             isDisabled={disabled}
             isInvalid={!!error}
             isRequired={required}
             maxValue={max}
             minValue={min}
+            placeholder={placeholder}
             value={field.value}
             onValueChange={field.onChange}
           />
