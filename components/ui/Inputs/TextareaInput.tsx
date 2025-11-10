@@ -14,6 +14,7 @@ interface TextareaInputProps {
   rows?: number;
   minRows?: number;
   maxRows?: number;
+  errorMessage?: string;
   maxLength?: number;
   description?: string;
 }
@@ -28,6 +29,7 @@ export const TextareaInput = ({
   minRows,
   maxRows,
   maxLength,
+  errorMessage,
   description,
 }: TextareaInputProps) => {
   const {
@@ -50,7 +52,13 @@ export const TextareaInput = ({
         render={({ field }) => (
           <Textarea
             {...field}
-            errorMessage={error}
+            classNames={{
+              input: "dark:text-white",
+              inputWrapper: "dark:bg-gray-800 dark:border-gray-700",
+              label: "dark:text-gray-300",
+              description: "dark:text-gray-400",
+            }}
+            errorMessage={error || errorMessage}
             id={name}
             isDisabled={disabled}
             isInvalid={!!error}
