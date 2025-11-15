@@ -2,9 +2,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@heroui/react";
-import { ArrowLeft, Calendar, Clock } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Button, Card, CardBody } from "@heroui/react";
+import { useTrackPostView } from "@/services/postViewsService";
+import { Text } from "@/components/ui/Text";
+import { Heading } from "@/components/ui/Heading";
+import PostReadHeader from "./PostReadHeader";
+import TableOfContents from "./TableOfContents";
+import CommentsSection from "@/components/features/comments/CommentsSection";
+import ShareButtons from "./ShareButtons";
+import TagsList from "./TagsList";
+import RelatedPosts from "./RelatedPosts";
+import AISummarize from "./AISummarize";
+import ReadingProgressBar from "./ReadingProgressBar";
+import MoreFromCategory from "./MoreFromCategory";
 
 interface Type {
   id: string;
@@ -19,20 +29,42 @@ interface Post {
   content: string;
   coverImage: string;
   createdAt: Date | null;
+  viewsCount?: number;
+  tags?: string[];
+}
+
+interface RelatedPost {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  coverImage: string;
 }
 
 interface PostReadViewProps {
   post: Post;
   type: Type;
   slug: string;
+  relatedPosts?: RelatedPost[];
+  moreFromCategory?: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    excerpt: string;
+    coverImage: string;
+    viewsCount?: number;
+  }>;
 }
 
 export default function PostReadView({
   post,
   type,
   slug,
+  relatedPosts = [],
+  moreFromCategory = [],
 }: PostReadViewProps) {
-  const router = useRouter();
+  // Track post view
+  useTrackPostView(post.slug);
 
   // Calculate reading time
   const readingTime = Math.ceil(
@@ -48,59 +80,28 @@ export default function PostReadView({
       })
     : "Unknown date";
 
+  // Get current URL for sharing
+  const currentUrl = typeof window !== "undefined" ? window.location.href : "";
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
+      {/* Reading Progress Bar - Fixed at Top */}
+      <ReadingProgressBar />
+
       {/* Header Section */}
-      <section className="border-b-2 border-dashed border-gray-300 dark:border-gray-700">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Button
-            isIconOnly
-            variant="light"
-            onPress={() => router.back()}
-            className="mb-6 text-gray-900 dark:text-gray-100"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
-            <Link href={`/${slug}`} className="hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
-              {type.name}
-            </Link>
-            <span>/</span>
-            <span className="text-gray-900 dark:text-gray-100">{post.title}</span>
-          </div>
-
-          {/* Title */}
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4 leading-tight">
-            {post.title}
-          </h1>
-
-          {/* Meta Info */}
-          <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              <span>{formattedDate}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              <span>{readingTime} min read</span>
-            </div>
-          </div>
-
-          {/* Excerpt */}
-          {post.excerpt && (
-            <p className="text-lg text-gray-600 dark:text-gray-400 mt-6 italic">
-              {post.excerpt}
-            </p>
-          )}
-        </div>
-      </section>
+      <PostReadHeader
+        post={post}
+        type={type}
+        slug={slug}
+        formattedDate={formattedDate}
+        readingTime={readingTime}
+        viewsCount={post.viewsCount || 0}
+      />
 
       {/* Cover Image */}
       {post.coverImage && (
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="relative w-full h-96 overflow-hidden rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+          <div className="relative w-full h-48 sm:h-64 md:h-80 lg:h-96 overflow-hidden rounded-lg">
             <Image
               src={post.coverImage}
               alt={post.title}
@@ -112,39 +113,77 @@ export default function PostReadView({
         </div>
       )}
 
-      {/* Content */}
-      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <article className="prose dark:prose-invert max-w-none">
-          <div
-            className="text-gray-800 dark:text-gray-200 leading-relaxed"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
-        </article>
-      </section>
-
-      {/* Footer Section */}
-      <section className="border-t-2 border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                More from {type.name}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Explore more articles in this category
-              </p>
+      {/* Main Content with Sidebars */}
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+        <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
+          {/* Left Sidebar - Desktop Only */}
+          <aside className="hidden lg:flex lg:flex-col lg:items-center w-48 flex-shrink-0">
+            <div className="w-full sticky top-24">
+              <div className="p-2">
+                <ShareButtons title={post.title} url={currentUrl} />
+              </div>
             </div>
-            <Link href={`/${slug}`}>
-              <Button
-                color="primary"
-                variant="flat"
-              >
-                View Category
-              </Button>
-            </Link>
-          </div>
+          </aside>
+
+          {/* Main Article Content */}
+          <section className="flex-1 w-full max-w-full lg:max-w-3xl lg:mx-auto">
+            {/* AI Summarize - Mobile & Tablet */}
+            <div className="lg:hidden mb-4 sm:mb-6 flex justify-start sm:justify-end">
+              <div className="w-full sm:w-auto">
+                <AISummarize content={post.content} title={post.title} />
+              </div>
+            </div>
+
+            <Card className="w-full">
+              <CardBody className="p-4 sm:p-5 lg:p-6">
+                <article className="prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none">
+                  <div
+                    className="text-gray-800 dark:text-gray-200 leading-relaxed text-sm sm:text-base"
+                    dangerouslySetInnerHTML={{ __html: post.content }}
+                  />
+                </article>
+              </CardBody>
+            </Card>
+
+            {/* Share Buttons - Mobile & Tablet */}
+            <div className="lg:hidden mt-6">
+              <ShareButtons title={post.title} url={currentUrl} />
+            </div>
+          </section>
+
+          {/* Right Sidebar - Desktop Only */}
+          <aside className="hidden lg:block w-full lg:w-64 xl:w-80 flex-shrink-0">
+            <div className="space-y-4 lg:space-y-6 sticky top-24">
+              {/* AI Summarize */}
+              <div className="w-full">
+                <AISummarize content={post.content} title={post.title} />
+              </div>
+
+              {/* Table of Contents */}
+              <Card>
+                <CardBody className="p-3 lg:p-4">
+                  <TableOfContents />
+                </CardBody>
+              </Card>
+
+              {/* Related Posts */}
+              {relatedPosts.length > 0 && (
+                <Card>
+                  <CardBody className="p-3 lg:p-4">
+                    <RelatedPosts posts={relatedPosts} categorySlug={slug} />
+                  </CardBody>
+                </Card>
+              )}
+            </div>
+          </aside>
         </div>
-      </section>
+      </div>
+
+      {/* Comments Section */}
+      <CommentsSection postId={post.id} />
+
+      {/* More from Category Section */}
+      <MoreFromCategory type={type} slug={slug} posts={moreFromCategory} />
     </div>
   );
 }
