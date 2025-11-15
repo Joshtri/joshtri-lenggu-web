@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     
     // Valid orderBy values for Clerk
     const validOrderBy = ["-created_at", "created_at", "-updated_at", "updated_at"];
-    const finalOrderBy = orderBy && validOrderBy.includes(orderBy) ? (orderBy as any) : undefined;
+    const finalOrderBy = orderBy && validOrderBy.includes(orderBy) ? (orderBy as never) : undefined;
     
     const response = await getClerkUserList({
       limit: limit ? Number(limit) : 10,

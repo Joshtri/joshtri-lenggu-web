@@ -2,7 +2,7 @@
 export interface BaseSetting {
   id?: string;
   key: string;
-  value: any;
+  value: string;
   description?: string;
   category: string;
   isActive: boolean;

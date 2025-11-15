@@ -195,7 +195,7 @@ export function FormFieldRenderer({
       );
 
     default:
-      console.warn(`Unknown field type: ${(field as any).type}`);
+      console.warn(`Unknown field type: ${(field as FieldConfig).type}`);
 
       return null;
   }

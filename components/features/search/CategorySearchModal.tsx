@@ -233,7 +233,7 @@ export function CategorySearchModal({
               {results.length === 0 && suggestions.length === 0 && (
                 <div className="text-center py-8 text-slate-500 dark:text-slate-400">
                   <p className="text-sm">
-                    No {typeName.toLowerCase()} articles found for "{query}"
+                    No {typeName.toLowerCase()} articles found for “{query}”
                   </p>
                   <p className="text-xs mt-2">
                     Try different keywords or check other categories

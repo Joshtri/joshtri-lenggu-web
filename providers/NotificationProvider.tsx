@@ -49,11 +49,18 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
   });
 
   // Update unread count
-  useEffect(() => {
+  useCallback(() => {
     if (data) {
       setUnreadCount(data.length);
     }
   }, [data]);
+
+
+  //   useEffect(() => {
+  //   if (data) {
+  //     setUnreadCount(data.length);
+  //   }
+  // }, [data]);
 
   // Simple mark as read (notifications auto-clear after 7 days)
   const markAsRead = useCallback(

@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       password: body.password,
     });
 
-    const createUserParams: any = {
+    const createUserParams: Parameters<typeof client.users.createUser>[0] = {
       emailAddress: [body.email],
       firstName: body.firstName,
       password: body.password,
@@ -139,8 +139,8 @@ export async function POST(request: NextRequest) {
       // Log detailed error info
       console.error("Error details:", {
         message: errorMessage,
-        cause: (error as any).cause,
-        errors: (error as any).errors,
+        cause: error.cause,
+        errors: (error as unknown as Record<string, unknown>).errors,
       });
 
       if (errorMessage.includes("already exists")) {
@@ -154,10 +154,14 @@ export async function POST(request: NextRequest) {
       }
 
       // Check for Clerk validation errors
-      if ((error as any).errors && Array.isArray((error as any).errors)) {
-        const clerkErrors = (error as any).errors;
+      const errorObj = error as unknown as Record<string, unknown>;
+      if (errorObj.errors && Array.isArray(errorObj.errors)) {
+        const clerkErrors = errorObj.errors;
         console.error("Clerk validation errors:", JSON.stringify(clerkErrors, null, 2));
-        const errorDetails = clerkErrors.map((e: any) => e.message || e.code || e).join(", ");
+        const errorDetails = clerkErrors.map((e: unknown) => {
+          const err = e as Record<string, unknown>;
+          return (err.message as string) || (err.code as string) || String(e);
+        }).join(", ");
         return NextResponse.json(
           {
             success: false,

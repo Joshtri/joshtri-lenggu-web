@@ -1,4 +1,5 @@
 import { BookOpen, Heart, MessageCircle, Eye } from "lucide-react";
+import Link from "next/link";
 
 interface UserDashboardProps {
   userEmail: string | null;
@@ -85,7 +86,7 @@ export function UserDashboard({ userEmail }: UserDashboardProps) {
                 New post published
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                "Getting Started with Next.js 16" - 2 hours ago
+                &quot;Getting Started with Next.js 16&quot; - 2 hours ago
               </p>
             </div>
           </div>
@@ -98,7 +99,7 @@ export function UserDashboard({ userEmail }: UserDashboardProps) {
                 Your post received likes
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                15 new likes on "Understanding React Hooks" - 5 hours ago
+                15 new likes on &quot;Understanding React Hooks&quot; - 5 hours ago
               </p>
             </div>
           </div>
@@ -109,7 +110,7 @@ export function UserDashboard({ userEmail }: UserDashboardProps) {
             <div>
               <p className="text-sm font-medium text-gray-900">New comment</p>
               <p className="text-xs text-gray-500 mt-1">
-                Someone commented on "TypeScript Best Practices" - 1 day ago
+                Someone commented on &quot;TypeScript Best Practices&quot; - 1 day ago
               </p>
             </div>
           </div>
@@ -122,24 +123,24 @@ export function UserDashboard({ userEmail }: UserDashboardProps) {
           Quick Links
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <a
+          <Link
             href="/my-posts"
             className="p-3 bg-white rounded-lg hover:shadow-md transition-shadow border border-gray-200"
           >
             <p className="font-medium text-gray-900 text-sm">View My Posts</p>
-          </a>
-          <a
+          </Link>
+          <Link
             href="/profile"
             className="p-3 bg-white rounded-lg hover:shadow-md transition-shadow border border-gray-200"
           >
             <p className="font-medium text-gray-900 text-sm">Edit Profile</p>
-          </a>
-          <a
+          </Link>
+          <Link
             href="/settings"
             className="p-3 bg-white rounded-lg hover:shadow-md transition-shadow border border-gray-200"
           >
             <p className="font-medium text-gray-900 text-sm">Settings</p>
-          </a>
+          </Link>
         </div>
       </div>
     </div>

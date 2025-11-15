@@ -11,7 +11,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:migrate-clerk": "node scripts/migrate-add-clerk-id.js"
+    "db:migrate-clerk": "node scripts/migrate-add-clerk-id.js",
+    "prepare": "husky"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.30",
@@ -50,6 +51,7 @@
     "drizzle-kit": "^0.31.5",
     "eslint": "^9",
     "eslint-config-next": "16.0.0",
+    "husky": "^9.1.7",
     "tailwindcss": "^4",
     "typescript": "^5.9.3"
   }

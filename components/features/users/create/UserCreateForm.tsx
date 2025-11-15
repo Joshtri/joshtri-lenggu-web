@@ -112,7 +112,7 @@ export function UserCreateForm() {
         let errorMessage = data.message || "Failed to create user";
         if (data.details && Array.isArray(data.details)) {
           const detailsStr = data.details
-            .map((d: any) => d.message || d.code || JSON.stringify(d))
+            .map((d: { message?: string; code?: string }) => d.message || d.code || JSON.stringify(d))
             .join("; ");
           errorMessage = `${errorMessage}: ${detailsStr}`;
         }

@@ -23,7 +23,7 @@ export function usePushNotifications() {
   useEffect(() => {
     // Check if push notifications are supported
     const supported = isPushNotificationSupported();
-    setIsSupported(supported);
+    // setIsSupported(supported);
 
     // Only initialize if user is signed in and notifications are supported
     if (isSignedIn && supported && !isInitialized) {

@@ -23,22 +23,12 @@ import Link from "next/link";
  */
 export function SearchModal() {
   // Get shared state from context
-  const {
-    isOpen,
-    setIsOpen,
-    handleQueryChange,
-    handleClose,
-  } = useSearchContext();
+  const { isOpen, setIsOpen, handleQueryChange, handleClose } =
+    useSearchContext();
 
   // Get search results from hook
-  const {
-    query,
-    results,
-    suggestions,
-    isLoading,
-    error,
-    totalResults,
-  } = useSearch();
+  const { query, results, suggestions, isLoading, error, totalResults } =
+    useSearch();
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -69,7 +59,7 @@ export function SearchModal() {
       backdrop="opaque"
       className="rounded-xl"
       classNames={{
-        backdrop: "bg-black/50"
+        backdrop: "bg-black/50",
       }}
       hideCloseButton
       scrollBehavior="inside"
@@ -189,7 +179,9 @@ export function SearchModal() {
                     {results.map((result) => (
                       <Link
                         key={result.id}
-                        href={`/${result.type?.toLowerCase() || "blog"}/${result.slug}`}
+                        href={`/${result.type?.toLowerCase() || "blog"}/${
+                          result.slug
+                        }`}
                         onClick={handleClose}
                       >
                         <div className="group p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border dark:border-slate-800 border-slate-200 cursor-pointer">
@@ -226,7 +218,7 @@ export function SearchModal() {
               {/* No results state */}
               {results.length === 0 && suggestions.length === 0 && (
                 <div className="text-center py-8 text-slate-500 dark:text-slate-400">
-                  <p className="text-sm">No articles found for "{query}"</p>
+                  <p className="text-sm">No articles found for “{query}”</p>
                   <p className="text-xs mt-2">
                     Try different keywords or check our categories
                   </p>

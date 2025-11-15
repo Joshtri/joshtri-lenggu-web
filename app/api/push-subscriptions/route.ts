@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
  */
 
 // In-memory storage for push subscriptions
-const pushSubscriptions = new Map<string, any>();
+const pushSubscriptions = new Map<string, unknown>();
 
 // POST - Save push subscription
 export async function POST(request: NextRequest) {

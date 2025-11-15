@@ -44,10 +44,15 @@ export const metadata: Metadata = {
       },
     ],
   },
-  msapplication: {
-    TileColor: "#2563eb",
-    TileImage: "/mstile-144x144.png",
-  },
+  applicationName: "Joshtri Lenggu Blog",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#121212" },
+  ],
+  // msapplication: {
+  //   TileColor: "#2563eb",
+  //   TileImage: "/mstile-144x144.png",
+  // },
 };
 
 export default function RootLayout({

@@ -171,7 +171,7 @@ export default function AISummaryButton({
                       {title}
                     </h4>
                     <Text className="text-xs text-gray-500 dark:text-gray-400">
-                      Here's what this article is about:
+                      Here&apos;s what this article is about:
                     </Text>
                   </div>
 

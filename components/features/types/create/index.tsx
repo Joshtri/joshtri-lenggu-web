@@ -8,11 +8,7 @@ import { TextareaInput } from "@/components/ui/Inputs/TextareaInput";
 import { Button } from "@heroui/react";
 import { Save, FileType } from "lucide-react";
 import { useCreateType, useUpdateType } from "@/services/typesService";
-import {
-  CreateTypeInput,
-  UpdateTypeInput,
-  Type,
-} from "../interfaces";
+import { CreateTypeInput, UpdateTypeInput, Type } from "../interfaces";
 import { Text } from "@/components/ui/Text";
 
 type TypeFormData = {
@@ -162,12 +158,12 @@ export default function TypeForm({
             {/* Info Column - Right Side */}
             <div className="space-y-6">
               {/* Info Tip */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-4">
+              <div className="bg-linear-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-4">
                 <Text className="text-sm text-blue-700">
                   <strong>💡 Tip:</strong> Types help categorize your blog posts
-                  into different content categories. Examples: "blog-personal" for
-                  personal blog posts, "teknologi" for technology articles,
-                  "tutorial" for how-to guides.
+                  into different content categories. Examples: “blog-personal”
+                  for personal blog posts, “teknologi” for technology articles,
+                  “tutorial” for how-to guides.
                 </Text>
               </div>
 

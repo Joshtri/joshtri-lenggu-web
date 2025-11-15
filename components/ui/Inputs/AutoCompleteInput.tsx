@@ -65,7 +65,7 @@ export const AutocompleteInput = ({
             selectedKey={String(field.value)}
             onSelectionChange={(key: string | number | null) => {
               const selected = key as string;
-              let newValue: any = selected;
+              let newValue: Option["value"] = selected;
 
               if (selected === "true") newValue = true;
               else if (selected === "false") newValue = false;

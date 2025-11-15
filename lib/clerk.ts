@@ -13,7 +13,7 @@ export async function getClerkUserList(params?: {
 }) {
   const client = await clerkClient();
 
-  const config: any = {
+  const config: Parameters<typeof client.users.getUserList>[0] = {
     limit: params?.limit || 10,
     offset: params?.offset || 0,
     query: params?.query,

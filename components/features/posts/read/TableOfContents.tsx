@@ -34,14 +34,17 @@ export default function TableOfContents() {
       });
     });
 
-    setToc(items);
+    // Defer state update to avoid cascading renders during effect
+    const timeoutId = window.setTimeout(() => {
+      setToc(items);
+    }, 0);
 
     // Track active heading on scroll
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
+            setActiveId((entry.target as HTMLElement).id);
           }
         });
       },
@@ -50,7 +53,10 @@ export default function TableOfContents() {
 
     headings.forEach((heading) => observer.observe(heading));
 
-    return () => observer.disconnect();
+    return () => {
+      clearTimeout(timeoutId);
+      observer.disconnect();
+    };
   }, []);
 
   if (toc.length === 0) return null;
