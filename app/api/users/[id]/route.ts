@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getClerkUser } from "@/lib/clerk";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { auth } from "@clerk/nextjs/server";
 
-// GET - Fetch single user by ID from Clerk
+// GET - Fetch single user by Clerk ID
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -21,61 +23,64 @@ export async function GET(
       );
     }
 
-    const { id } = await params;
+    const { id: clerkId } = await params;
 
-    if (!id) {
+    if (!clerkId) {
       return NextResponse.json(
         { success: false, message: "Invalid user ID" },
         { status: 400 }
       );
     }
 
-    const user = await getClerkUser(id);
+    // Fetch user from database using clerkId
+    const dbUser = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        image: users.image,
+        bio: users.bio,
+        role: users.role,
+        clerkId: users.clerkId,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+      .from(users)
+      .where(eq(users.clerkId, clerkId))
+      .limit(1);
 
-    // Transform Clerk user data to simpler format
-    const userData = {
-      id: user.id,
-      email: user.emailAddresses[0]?.emailAddress || null,
-      username: user.username,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      fullName: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
-      imageUrl: user.imageUrl,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-      lastSignInAt: user.lastSignInAt,
-      emailVerified: user.emailAddresses[0]?.verification?.status === "verified",
-      phoneNumbers: user.phoneNumbers.map((phone) => ({
-        phoneNumber: phone.phoneNumber,
-        verified: phone.verification?.status === "verified",
-      })),
-      externalAccounts: user.externalAccounts.map((account) => ({
-        provider: account.provider,
-        emailAddress: account.emailAddress,
-      })),
-    };
+    if (!dbUser || dbUser.length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "User not found in database",
+        },
+        { status: 404 }
+      );
+    }
+
+    const user = dbUser[0];
 
     return NextResponse.json(
       {
         success: true,
-        data: userData,
+        data: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
+          bio: user.bio,
+          role: user.role,
+          clerkId: user.clerkId,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        },
         message: "User fetched successfully",
       },
       { status: 200 }
     );
   } catch (error) {
     console.error("Error fetching user:", error);
-
-    // Check if user not found
-    if (error instanceof Error && error.message.includes("not found")) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "User not found",
-        },
-        { status: 404 }
-      );
-    }
 
     return NextResponse.json(
       {
