@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import type Quill from "quill";
-// @ts-expect-error side-effect import of Quill Snow CSS (add a .d.ts declaring this module if you prefer)
 import "quill/dist/quill.snow.css";
 import { cn } from "@heroui/react";
 
@@ -33,6 +32,7 @@ const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorProps>(
     const editorRef = useRef<HTMLDivElement>(null);
     const quillRef = useRef<Quill | null>(null);
     const onChangeRef = useRef(onChange);
+    const textChangeHandlerRef = useRef<(() => void) | null>(null);
 
     useEffect(() => {
       onChangeRef.current = onChange;
@@ -114,21 +114,25 @@ const RichTextEditor = forwardRef<RichTextEditorHandle, RichTextEditorProps>(
               quill.root.innerHTML = defaultValue;
             }
 
-            quill.on("text-change", () => {
+            const textChangeHandler = () => {
               if (onChangeRef.current) {
                 const content = quill.root.innerHTML;
                 onChangeRef.current(content);
               }
-            });
+            };
+
+            textChangeHandlerRef.current = textChangeHandler;
+            quill.on("text-change", textChangeHandler);
           }
         });
       }
 
       return () => {
         mounted = false;
-        if (quillRef.current) {
-          quillRef.current.off("text-change");
+        if (quillRef.current && textChangeHandlerRef.current) {
+          quillRef.current.off("text-change", textChangeHandlerRef.current);
           quillRef.current = null;
+          textChangeHandlerRef.current = null;
         }
       };
     }, []);
