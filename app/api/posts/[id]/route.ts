@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { posts, comments } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { posts, comments, postViews } from "@/db/schema";
+import { eq, sql } from "drizzle-orm";
 
 // GET - Fetch single post by ID
 export async function GET(
@@ -22,7 +22,20 @@ export async function GET(
     }
 
     const post = await db
-      .select()
+      .select({
+        id: posts.id,
+        slug: posts.slug,
+        title: posts.title,
+        excerpt: posts.excerpt,
+        content: posts.content,
+        coverImage: posts.coverImage,
+        authorId: posts.authorId,
+        labelId: posts.labelId,
+        typeId: posts.typeId,
+        createdAt: posts.createdAt,
+        updatedAt: posts.updatedAt,
+        viewsCount: posts.viewsCount,
+      })
       .from(posts)
       .where(eq(posts.id, id))
       .limit(1);
