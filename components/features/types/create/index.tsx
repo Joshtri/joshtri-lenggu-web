@@ -100,7 +100,7 @@ export default function TypeForm({
               color="primary"
               size="sm"
               isLoading={isSubmitting}
-              onPress={handleSubmit(onSubmit)}
+              onPress={() => handleSubmit(onSubmit)()}
               startContent={!isSubmitting && <Save className="h-4 w-4" />}
             >
               {isSubmitting
