@@ -25,7 +25,7 @@ export function ImageUploadInput({
   } = useFormContext();
 
   const [previewUrl, setPreviewUrl] = useState<string>("");
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [_selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const currentValue = watch(name);

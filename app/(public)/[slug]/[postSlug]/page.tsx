@@ -49,7 +49,8 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
   return {
     title: currentPost.title,
     description: currentPost.excerpt || currentPost.content?.substring(0, 160) || "Read this blog post on Joshtri Lenggu Blog",
-    keywords: currentPost.tags?.join(", ") || "blog, technology, learning",
+    // keywords: currentPost.tags?.join(", ") || "blog, technology, learning",
+    keywords: "blog, technology, learning",
     authors: [
       {
         name: "Joshtri Lenggu",
@@ -64,7 +65,7 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
       url: `${BASE_URL}/${slug}/${postSlug}`,
       images: [
         {
-          url: currentPost.image || `${BASE_URL}/og-image.jpg`,
+          url: currentPost.coverImage || `${BASE_URL}/og-image.jpg`,
           width: 1200,
           height: 630,
           alt: currentPost.title,
@@ -75,9 +76,11 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
       card: "summary_large_image",
       title: currentPost.title,
       description: currentPost.excerpt || currentPost.content?.substring(0, 160),
-      images: [currentPost.image || `${BASE_URL}/og-image.jpg`],
+      images: [currentPost.coverImage || `${BASE_URL}/og-image.jpg`],
     },
-    canonical: `${BASE_URL}/${slug}/${postSlug}`,
+    alternates: {
+      canonical: `${BASE_URL}/${slug}/${postSlug}`,
+    },
   };
 }
 

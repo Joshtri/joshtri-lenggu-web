@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-//@ts-expect-error import global css;
+import { Suspense } from "react";
+
 import "./globals.css";
 import Providers from "@/providers";
 import { LoadingBar } from "@/components/ui/LoadingBar";
@@ -83,7 +84,9 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-          <LoadingBar />
+          <Suspense fallback={null}>
+            <LoadingBar />
+          </Suspense>
           <ScrollToTop />
           <Providers>{children}</Providers>
         </body>

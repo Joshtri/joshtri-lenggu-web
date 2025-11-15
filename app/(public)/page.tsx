@@ -7,7 +7,8 @@ const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {
   title: "Joshtri Lenggu Blog - Language Learning & Technology",
-  description: "Explore articles about language learning, technology, and personal development. A blog dedicated to helping you learn and grow.",
+  description:
+    "Explore articles about language learning, technology, and personal development. A blog dedicated to helping you learn and grow.",
   keywords: "blog, language learning, technology, programming, education",
   authors: [{ name: "Joshtri Lenggu" }],
   openGraph: {
@@ -31,7 +32,9 @@ export const metadata: Metadata = {
     description: "A blog about language learning and technology",
     images: [`${BASE_URL}/og-image.jpg`],
   },
-  canonical: BASE_URL,
+  alternates: {
+    canonical: BASE_URL,
+  },
 };
 
 export default function HomeBlog() {
