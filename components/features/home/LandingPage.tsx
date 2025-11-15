@@ -11,7 +11,7 @@ import {
   Loader2,
 } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { textToSlug } from "@/lib/slug";
 
 interface TypeWithCount {
@@ -19,6 +19,11 @@ interface TypeWithCount {
   name: string;
   description: string | null;
   postCount: number;
+}
+
+interface Category extends TypeWithCount {
+  slug: string;
+  icon: React.ComponentType<{ className?: string }>;
 }
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -30,46 +35,38 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   design: Palette,
 };
 
+// Fetch function for TanStack Query
+const fetchTypes = async (): Promise<Category[]> => {
+  const response = await fetch("/api/public/types");
+  const result = await response.json();
+
+  if (!result.success) {
+    throw new Error("Failed to fetch types");
+  }
+
+  return result.data.map((type: TypeWithCount) => ({
+    ...type,
+    slug: textToSlug(type.name),
+    icon:
+      iconMap[textToSlug(type.name)] ||
+      iconMap[type.name.toLowerCase()] ||
+      BookHeart,
+  }));
+};
+
 export function LandingPage() {
-  const [categories, setCategories] = useState<
-    (TypeWithCount & { icon: React.ComponentType<{ className?: string }> })[]
-  >([]);
-  const [loading, setLoading] = useState(true);
-  const [totalArticles, setTotalArticles] = useState(0);
+  // Use TanStack Query with caching
+  const { data: categories = [], isLoading: loading } = useQuery({
+    queryKey: ["publicTypes"],
+    queryFn: fetchTypes,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes (formerly cacheTime)
+  });
 
-  useEffect(() => {
-    const fetchTypes = async () => {
-      try {
-        const response = await fetch("/api/public/types");
-        const result = await response.json();
-
-        if (result.success) {
-          const typesWithIcons = result.data.map((type: TypeWithCount) => ({
-            ...type,
-            slug: textToSlug(type.name),
-            icon:
-              iconMap[textToSlug(type.name)] ||
-              iconMap[type.name.toLowerCase()] ||
-              BookHeart,
-          }));
-
-          setCategories(typesWithIcons);
-
-          const total = typesWithIcons.reduce(
-            (sum: number, type: TypeWithCount) => sum + type.postCount,
-            0
-          );
-          setTotalArticles(total);
-        }
-      } catch (error) {
-        console.error("Error fetching types:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTypes();
-  }, []);
+  const totalArticles = categories.reduce(
+    (sum: number, type: TypeWithCount) => sum + type.postCount,
+    0
+  );
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
@@ -147,9 +144,8 @@ export function LandingPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
-              {categories.map((category) => {
+              {categories.map((category: Category) => {
                 const Icon = category.icon;
-                //@ts-expect-error -- We know this is safe
                 const href = `/${category.slug}`;
                 return (
                   <Link key={category.id} href={href}>
