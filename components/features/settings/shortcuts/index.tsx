@@ -1,49 +1,22 @@
 "use client";
 
-import { ADD_BUTTON } from "@/components/ui/Button/ActionButtons";
+import {
+  ACTION_BUTTONS,
+  ADD_BUTTON,
+} from "@/components/ui/Button/ActionButtons";
 import { Heading } from "@/components/ui/Heading";
-import { SwitchInput, TextInput } from "@/components/ui/Inputs";
 import { Columns, ListGrid } from "@/components/ui/ListGrid";
 import { Text } from "@/components/ui/Text";
 import { Shortcut, ShortcutService } from "@/services/shortcutService";
-import {
-  Button,
-  Chip,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  useDisclosure,
-} from "@heroui/react";
-import { ExternalLink } from "lucide-react";
+import { Button, Chip } from "@heroui/react";
+import { ExternalLink, Edit, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-
-interface CreateShortcutInput {
-  name: string;
-  url: string;
-  description?: string;
-  icon?: string;
-  isActive: boolean;
-}
 
 export default function ShortcutsSettings() {
-  const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
-  const [editingShortcut, setEditingShortcut] = useState<Shortcut | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const methods = useForm<CreateShortcutInput>({
-    defaultValues: {
-      name: "",
-      url: "",
-      description: "",
-      icon: "",
-      isActive: true,
-    },
-  });
-
-  const { handleSubmit, reset } = methods;
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
+  const router = useRouter();
 
   const columns: Columns<Shortcut> = [
     {
@@ -101,43 +74,21 @@ export default function ShortcutsSettings() {
   ];
 
   const handleDelete = async (id: string) => {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this shortcut? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+
+    setIsDeleting(id);
     try {
       await ShortcutService.deleteShortcut(id);
       window.location.reload();
     } catch (error) {
       console.error("Failed to delete shortcut:", error);
-      throw error;
-    }
-  };
-
-  const handleEdit = (id: string, item: unknown) => {
-    const shortcut = item as Shortcut;
-    setEditingShortcut(shortcut);
-    reset({
-      name: shortcut.name,
-      url: shortcut.url,
-      description: shortcut.description || "",
-      icon: shortcut.icon || "",
-      isActive: shortcut.isActive,
-    });
-    onOpen();
-  };
-
-  const onSubmit = async (data: CreateShortcutInput) => {
-    setIsSubmitting(true);
-    try {
-      if (editingShortcut) {
-        await ShortcutService.updateShortcut(editingShortcut.id, data);
-      } else {
-        await ShortcutService.createShortcut(data);
-      }
-      onClose();
-      reset();
-      window.location.reload();
-    } catch (error) {
-      console.error("Failed to save shortcut:", error);
-    } finally {
-      setIsSubmitting(false);
+      setIsDeleting(null);
     }
   };
 
@@ -160,82 +111,21 @@ export default function ShortcutsSettings() {
         withoutBreadcrumbs={true}
         actionButtons={{
           add: ADD_BUTTON.CREATE("/settings/shortcuts/create"),
+          // edit: ACTION_BUTTONS.EDIT("/settings/shortcuts"),
+          edit: ACTION_BUTTONS.EDIT((id) => router.push(`/settings/shortcuts/${id}/edit`)),
+
+          delete: ACTION_BUTTONS.DELETE(handleDelete),
+          show: ACTION_BUTTONS.SHOW("/settings/shortcuts"),
+          // view: ACTION_BUTTONS.VIEW("/settings/shortcuts/[id]"),
         }}
         resourcePath="/shortcuts"
+        useExternalAPI={true}
         nameField="name"
         searchPlaceholder="Search shortcuts..."
         columns={columns}
         pageSize={10}
         showPagination={true}
       />
-
-      {/* Create/Edit Modal */}
-      <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="2xl">
-        <ModalContent>
-          {(onClose) => (
-            <FormProvider {...methods}>
-              <form onSubmit={handleSubmit(onSubmit)}>
-                <ModalHeader>
-                  <Heading className="text-lg font-semibold">
-                    {editingShortcut ? "Edit Shortcut" : "Add Shortcut"}
-                  </Heading>
-                </ModalHeader>
-                <ModalBody className="space-y-4">
-                  <TextInput
-                    name="name"
-                    label="Name"
-                    placeholder="Enter shortcut name"
-                    required
-                  />
-
-                  <TextInput
-                    name="url"
-                    label="URL"
-                    placeholder="https://example.com"
-                    required
-                  />
-
-                  <TextInput
-                    name="description"
-                    label="Description"
-                    placeholder="Enter description (optional)"
-                  />
-
-                  <TextInput
-                    name="icon"
-                    label="Icon (Emoji)"
-                    placeholder="🔗"
-                  />
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Heading className="text-base font-semibold">
-                        Active
-                      </Heading>
-                      <Text className="text-sm text-gray-600 dark:text-gray-400">
-                        Enable this shortcut
-                      </Text>
-                    </div>
-                    <SwitchInput name="isActive" color="primary" size="lg" />
-                  </div>
-                </ModalBody>
-                <ModalFooter>
-                  <Button color="danger" variant="light" onPress={onClose}>
-                    Cancel
-                  </Button>
-                  <Button
-                    color="primary"
-                    type="submit"
-                    isLoading={isSubmitting}
-                  >
-                    {editingShortcut ? "Update" : "Create"}
-                  </Button>
-                </ModalFooter>
-              </form>
-            </FormProvider>
-          )}
-        </ModalContent>
-      </Modal>
     </div>
   );
 }
