@@ -504,8 +504,15 @@ export function PostListBefore() {
   const router = useRouter();
   const { data, isLoading } = usePosts();
 
+  const columns: Columns<Post> = [
+    { key: "id", label: "ID" },
+    { key: "title", label: "Title" },
+    { key: "status", label: "Status" },
+    { key: "actions", label: "Actions", align: "center" as const },
+  ];
+
   return (
-    <ListGrid
+    <ListGrid<Post>
       title="Posts"
       columns={columns}
       data={data}
@@ -525,8 +532,15 @@ export function PostListAfter() {
   const { data, isLoading } = usePosts();
   // No need for useRouter anymore!
 
+  const columns: Columns<Post> = [
+    { key: "id", label: "ID" },
+    { key: "title", label: "Title" },
+    { key: "status", label: "Status" },
+    { key: "actions", label: "Actions", align: "center" as const },
+  ];
+
   return (
-    <ListGrid
+    <ListGrid<Post>
       title="Posts"
       columns={columns}
       data={data}
