@@ -2,25 +2,26 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@heroui/react";
-import { ArrowLeft, Eye } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { BookHeart, Code2, Zap, Palette } from "lucide-react";
+import { BookOpen } from "lucide-react";
+import { useState } from "react";
+import { Heading } from "@/components/ui/Heading";
+import { Text } from "@/components/ui/Text";
+import EmptyState from "@/components/ui/Common/EmptyState";
+import { formatPostDate } from "@/utils/formatDate";
+import CategoryHeader from "./CategoryHeader";
+import { Post } from "../posts/interfaces/posts";
+import { Type } from "../types/interfaces";
+import ShareDropdown from "@/components/ui/ShareDropdown";
+import { CategorySearchModal } from "../search/CategorySearchModal";
+import AISummaryButton from "./AISummaryButton";
+import { Button, Card, CardBody, CardFooter } from "@heroui/react";
 
-interface Type {
-  id: string;
-  name: string;
-  description: string | null;
-}
+// interface Type {
+//   id: string;
+//   name: string;
+//   description: string | null;
+// }
 
-interface Post {
-  id: string;
-  slug: string;
-  title: string;
-  excerpt: string;
-  coverImage: string;
-  createdAt: Date | null;
-}
 
 interface CategoryViewProps {
   type: Type;
@@ -28,74 +29,48 @@ interface CategoryViewProps {
   slug: string;
 }
 
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  "personal-blog": BookHeart,
-  "personal": BookHeart,
-  "technology": Code2,
-  "teknologi": Code2,
-  "tutorial": Zap,
-  "design": Palette,
-};
+export default function CategoryView({ type, posts, slug }: CategoryViewProps) {
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-export default function CategoryView({
-  type,
-  posts,
-  slug,
-}: CategoryViewProps) {
-  const router = useRouter();
-  const Icon = iconMap[slug] || BookHeart;
+  const getPostUrl = (postSlug: string) => {
+    return typeof window !== 'undefined'
+      ? `${window.location.origin}/${slug}/${postSlug}`
+      : `/${slug}/${postSlug}`;
+  };
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
-      {/* Header Section */}
-      <section className="border-b-2 border-dashed border-gray-300 dark:border-gray-700">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <Button
-            isIconOnly
-            variant="light"
-            onPress={() => router.back()}
-            className="mb-6 dark:text-gray-200"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+      {/* Category Search Modal */}
+      <CategorySearchModal
+        typeId={type.id}
+        typeName={type.name}
+        isOpen={isSearchOpen}
+        onOpenChange={setIsSearchOpen}
+      />
 
-          <div className="flex items-start gap-6 mb-6">
-            <div className="inline-flex items-center justify-center w-24 h-24 border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-full">
-              <Icon className="h-12 w-12 text-gray-900 dark:text-white" />
-            </div>
-            <div>
-              <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
-                {type.name}
-              </h1>
-              {type.description && (
-                <p className="text-xl text-gray-600 dark:text-gray-400 font-light">
-                  {type.description}
-                </p>
-              )}
-              <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
-                {posts.length} article{posts.length !== 1 ? "s" : ""}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Header Section */}
+      <CategoryHeader
+        type={type}
+        slug={slug}
+        postsCount={posts.length}
+        onSearchClick={() => setIsSearchOpen(true)}
+      />
 
       {/* Posts Grid Section */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {posts.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-xl text-gray-600 dark:text-gray-400 font-light">
-              No articles yet in this category
-            </p>
-          </div>
+          <EmptyState
+            title={"No articles yet in this category"}
+            description={"Stay tuned for more articles in this category."}
+          />
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {posts.map((post) => (
-              <Link key={post.id} href={`/${slug}/${post.slug}`}>
-                <div className="group relative h-full border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden hover:border-gray-900 dark:hover:border-gray-400 transition-all duration-300 cursor-pointer flex flex-col bg-white dark:bg-gray-900">
-                  {/* Cover Image */}
-                  {post.coverImage && (
-                    <div className="relative w-full h-48 overflow-hidden bg-gray-200 dark:bg-gray-800">
+              <Card key={post.id} className="group relative h-full   dark:border-gray-700 rounded-lg overflow-hidden hover:border-gray-900 dark:hover:border-gray-400 transition-all duration-300 flex flex-col bg-white dark:bg-gray-900">
+                {/* Cover Image */}
+                {post.coverImage && (
+                  <Link href={`/${slug}/${post.slug}`}>
+                    <div className="relative w-full h-48 overflow-hidden bg-gray-200 dark:bg-gray-800 cursor-pointer">
                       <Image
                         src={post.coverImage}
                         alt={post.title}
@@ -103,36 +78,45 @@ export default function CategoryView({
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
-                  )}
+                  </Link>
+                )}
 
-                  {/* Content */}
-                  <div className="flex-1 flex flex-col p-6">
-                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                {/* Content */}
+                <CardBody className="flex-1 flex flex-col p-6">
+                  <Link href={`/${slug}/${post.slug}`}>
+                    <Heading className="text-xl font-bold text-gray-900 dark:text-white mb-3 line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors cursor-pointer">
                       {post.title}
-                    </h3>
+                    </Heading>
+                  </Link>
 
-                    <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow font-light">
-                      {post.excerpt}
-                    </p>
+                  <Text className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-2 flex-grow font-light">
+                    {post.excerpt}
+                  </Text>
 
-                    {/* Footer */}
-                    <div className="flex items-center justify-between pt-4 border-t-2 border-dashed border-gray-200 dark:border-gray-700">
-                      {post.createdAt && (
-                        <span className="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-wider">
-                          {new Date(post.createdAt).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })}
-                        </span>
-                      )}
-                      <div className="flex items-center gap-2 text-gray-900 dark:text-white group-hover:gap-3 transition-all">
-                        <Eye className="h-4 w-4" />
-                      </div>
+                  {/* Footer */}
+                  <CardFooter  className="flex items-center justify-between pt-4 border-t-2 border-dashed border-gray-200 dark:border-gray-700">
+                    {post.createdAt && (
+                      <Text className="text-xs text-gray-500 dark:text-gray-500 uppercase tracking-wider">
+                        {formatPostDate(post.createdAt)}
+                      </Text>
+                    )}
+                    <div className="flex items-center gap-2 text-gray-900 dark:text-white">
+                      {/* <AISummaryButton
+                        title={post.title}
+                        excerpt={post.excerpt}
+                        content={post.content}
+                      /> */}
+                      <Button as={Link} isIconOnly variant="light" size="sm"  href={`/${slug}/${post.slug}`} className="flex items-center gap-1 transition-colors cursor-pointer">
+                        <BookOpen className="h-4 w-4" />
+                      </Button>
+                      <ShareDropdown
+                        title={post.title}
+                        url={getPostUrl(post.slug)}
+                      />
                     </div>
-                  </div>
-                </div>
-              </Link>
+                  </CardFooter>
+                </CardBody>
+              </Card>
             ))}
           </div>
         )}
