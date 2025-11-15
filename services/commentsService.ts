@@ -85,8 +85,8 @@ export function useComments(params?: QueryParams) {
   return useQuery({
     queryKey: commentsKeys.list(params),
     queryFn: () => fetchComments(params),
-    staleTime: 5000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 }
 
@@ -96,8 +96,8 @@ export function useCommentsByPost(postId: string) {
     queryKey: commentsKeys.byPost(postId),
     queryFn: () => fetchCommentsByPost(postId),
     enabled: !!postId && postId.length > 0,
-    staleTime: 5000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: 1000 * 60 * 5, // 5 minutes - comments stay cached
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 }
 
@@ -107,7 +107,8 @@ export function useComment(id: string) {
     queryKey: commentsKeys.detail(id),
     queryFn: () => getComment(id),
     enabled: !!id && id.length > 0,
-    staleTime: 5000,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 }
 
