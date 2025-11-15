@@ -6,6 +6,7 @@ export interface Post  extends BaseEntity{
     coverImage: string;
     content: string;
     excerpt: string;
+    viewsCount: number;
     authorId: string | null;
     labelId: string | null;
     typeId: string | null;
