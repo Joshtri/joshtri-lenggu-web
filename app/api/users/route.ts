@@ -1,7 +1,9 @@
+import { users } from '@/db/schema/users.schema';
 import { NextRequest, NextResponse } from "next/server";
 import { getClerkUserList } from "@/lib/clerk";
 import { auth } from "@clerk/nextjs/server";
-
+import { db } from "@/db";
+// import { users } from "@/db";
 // GET - Fetch all users from Clerk
 export async function GET(request: NextRequest) {
   try {
@@ -18,21 +20,36 @@ export async function GET(request: NextRequest) {
       );
     }
 
+
+    
+    
+    
     const searchParams = request.nextUrl.searchParams;
     const limit = searchParams.get("limit");
     const offset = searchParams.get("offset");
     const query = searchParams.get("query");
     const orderBy = searchParams.get("orderBy");
+    
+    
+    
+    
+    const usersDataFromNeonDB = await db.select().from(users);
 
+    console.log(usersDataFromNeonDB, 'usersDataFromNeonDB')
+    
+    // Valid orderBy values for Clerk
+    const validOrderBy = ["-created_at", "created_at", "-updated_at", "updated_at"];
+    const finalOrderBy = orderBy && validOrderBy.includes(orderBy) ? (orderBy as any) : undefined;
+    
     const response = await getClerkUserList({
       limit: limit ? Number(limit) : 10,
       offset: offset ? Number(offset) : 0,
       query: query || undefined,
-      orderBy: orderBy || "-created_at",
+      orderBy: finalOrderBy,
     });
 
     // Transform Clerk user data to simpler format
-    const users = response.data.map((user) => ({
+    const usersDataClerk = response.data.map((user) => ({
       id: user.id,
       email: user.emailAddresses[0]?.emailAddress || null,
       username: user.username,
@@ -46,10 +63,13 @@ export async function GET(request: NextRequest) {
       emailVerified: user.emailAddresses[0]?.verification?.status === "verified",
     }));
 
+
+    console.log(usersDataClerk, 'usersDataClerk')
+
     return NextResponse.json(
       {
         success: true,
-        data: users,
+        data: usersDataClerk,
         totalCount: response.totalCount,
         message: "Users fetched successfully",
       },
