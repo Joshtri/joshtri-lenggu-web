@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
+//@ts-expect-error import global css;
 import "./globals.css";
 import Providers from "@/providers";
-// import 
+import { LoadingBar } from "@/components/ui/LoadingBar";
+import { ScrollToTop } from "@/components/ui/ScrollToTop";
+import { ClerkProviderWrapper } from "@/lib/ClerkProviderWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,6 +20,34 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Joshtri Lenggu Blog",
   description: "A blog about language learning and technology",
+  viewport: "width=device-width, initial-scale=1.0, maximum-scale=5.0",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Joshtri Lenggu Blog",
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: [
+      {
+        url: "/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
+    other: [
+      {
+        rel: "mask-icon",
+        url: "/safari-pinned-tab.svg",
+        color: "#2563eb",
+      },
+    ],
+  },
+  msapplication: {
+    TileColor: "#2563eb",
+    TileImage: "/mstile-144x144.png",
+  },
 };
 
 export default function RootLayout({
@@ -26,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProviderWrapper>
       <html lang="en" suppressHydrationWarning>
         <head>
           <script
@@ -48,9 +78,11 @@ export default function RootLayout({
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
+          <LoadingBar />
+          <ScrollToTop />
           <Providers>{children}</Providers>
         </body>
       </html>
-    </ClerkProvider>
+    </ClerkProviderWrapper>
   );
 }
