@@ -11,7 +11,7 @@ interface HomePageProps {
 }
 
 export function HomePage({ posts, labels }: HomePageProps) {
-  const [selectedLabel, setSelectedLabel] = useState<number | null>(null);
+  const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
 
   // Filter posts based on selected label
   const filteredPosts = selectedLabel
