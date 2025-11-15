@@ -110,6 +110,10 @@ interface ListGridProps<T = unknown> {
   // NEW! Resource-based fetching (pass resource path like "posts", "comments")
   resourcePath?: string; // e.g., "/posts" or "/comments"
   
+  // NEW! Use external API (like NEXT_PUBLIC_SETTINGS_API_URL)
+  useExternalAPI?: boolean; // If true, uses NEXT_PUBLIC_SETTINGS_API_URL
+  externalAPIBaseURL?: string; // Custom base URL (overrides useExternalAPI)
+  
   // NEW! Auto-mapping: pass raw data array or API response
   // Supports: T[], { data: T[] }, or { data: { data: T[] } }
   data?: DataExtractor<T>;
@@ -153,6 +157,8 @@ export function ListGrid<T = unknown>({
   onSearch,
   columns,
   resourcePath,
+  useExternalAPI = false,
+  externalAPIBaseURL,
   isError,
   error,
   data,
@@ -182,6 +188,19 @@ export function ListGrid<T = unknown>({
   const isMobile = isMobileProp ?? isMobileDevice;
   const queryClient = useQueryClient();
 
+  // Determine API base URL
+  const getAPIBaseURL = () => {
+    if (externalAPIBaseURL) {
+      return externalAPIBaseURL;
+    }
+    if (useExternalAPI) {
+      return process.env.NEXT_PUBLIC_SETTINGS_API_URL || "";
+    }
+    return ""; // Default: use apiClient's base URL
+  };
+
+  const apiBaseURL = getAPIBaseURL();
+
   // NEW! Auto-fetch data if resourcePath is provided
   const {
     data: fetchedData,
@@ -189,15 +208,20 @@ export function ListGrid<T = unknown>({
     isError: isFetchError,
     error: fetchError,
   } = useQuery({
-    queryKey: [resourcePath],
+    queryKey: [resourcePath, apiBaseURL],
     queryFn: async () => {
       if (!resourcePath) return null;
-      const { data } = await apiClient.get<ApiResponse<T[]>>(resourcePath);
+      
+      const fullURL = apiBaseURL 
+        ? `${apiBaseURL}${resourcePath}`
+        : resourcePath;
+      
+      const { data } = await apiClient.get<ApiResponse<T[]>>(fullURL);
       return data;
     },
     enabled: !!resourcePath && !data, // Only fetch if resourcePath provided and no data prop
-    staleTime: 5000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: 1000 * 60 * 5, // 5 minutes cache
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 
   // Use fetched data if available, otherwise use provided data
@@ -317,12 +341,16 @@ export function ListGrid<T = unknown>({
         await actionButtons.delete.onDelete(itemToDelete.id, itemToDelete.item);
       } else if (resourcePath) {
         // Use auto-delete via API
-        await apiClient.delete(`${resourcePath}/${itemToDelete.id}`);
+        const fullURL = apiBaseURL 
+          ? `${apiBaseURL}${resourcePath}/${itemToDelete.id}`
+          : `${resourcePath}/${itemToDelete.id}`;
+        
+        await apiClient.delete(fullURL);
       }
       
       // Refetch data after successful delete
       if (resourcePath) {
-        await queryClient.invalidateQueries({ queryKey: [resourcePath] });
+        await queryClient.invalidateQueries({ queryKey: [resourcePath, apiBaseURL] });
       }
       
       setIsDeleteDialogOpen(false);
