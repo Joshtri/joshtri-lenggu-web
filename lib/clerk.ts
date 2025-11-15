@@ -6,21 +6,27 @@ import { clerkClient } from "@clerk/nextjs/server";
 export async function getClerkUserList(params?: {
   limit?: number;
   offset?: number;
-  orderBy?: string;
+  orderBy?: "-created_at" | "created_at" | "-updated_at" | "updated_at";
   query?: string;
   emailAddress?: string[];
   organizationId?: string[];
 }) {
   const client = await clerkClient();
 
-  const response = await client.users.getUserList({
+  const config: any = {
     limit: params?.limit || 10,
     offset: params?.offset || 0,
-    orderBy: params?.orderBy || "-created_at",
     query: params?.query,
     emailAddress: params?.emailAddress,
     organizationId: params?.organizationId,
-  });
+  };
+
+  // Only add orderBy if it's explicitly provided
+  if (params?.orderBy) {
+    config.orderBy = params.orderBy;
+  }
+
+  const response = await client.users.getUserList(config);
 
   return response;
 }
