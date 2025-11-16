@@ -4,6 +4,7 @@ import { Button, Card, CardBody, Input } from "@heroui/react";
 import { ArrowRight, Sparkles, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { textToSlug } from "@/lib/slug";
 import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
@@ -60,33 +61,84 @@ export function LandingPage() {
       <section className="relative overflow-hidden border-b-2 border-dashed border-gray-300 dark:border-gray-700">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-32 lg:py-40">
           <div className="text-center">
-            {/* Decorative dashed box */}
-            {/* 
-            <div className="inline-block mb-8">
-              <div className="border-2 border-dashed border-gray-400 rounded-lg px-6 py-3">
-                <div className="flex items-center gap-2 text-gray-700">
-                  <Sparkles className="h-4 w-4" />
-                   <span className="text-sm font-medium tracking-wide">WELCOME</span>
-                </div>
-              </div> 
-            </div>
-              */}
 
-            <Heading className="text-6xl sm:text-7xl lg:tex  t-8xl font-bold mb-8 leading-none tracking-tight text-gray-900 dark:text-white">
-              Stories &<br />
-              <span className="relative inline-block">
+            <Heading className="text-6xl sm:text-7xl lg:text-8xl font-bold mb-8 leading-none tracking-tight text-gray-900 dark:text-white overflow-hidden">
+              <motion.div
+                initial={{ opacity: 0, x: -100 }}
+                animate={{
+                  opacity: 1,
+                  x: 0,
+                  y: [0, -15, 0, -15, 0]
+                }}
+                transition={{
+                  opacity: { duration: 0.8, ease: "easeOut" },
+                  x: { duration: 0.8, ease: "easeOut" },
+                  y: {
+                    duration: 0.6,
+                    delay: 4,
+                    repeat: Infinity,
+                    repeatDelay: 2
+                  }
+                }}
+                className="inline-block"
+              >
+                Stories
+              </motion.div>
+              <motion.span
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="inline-block ml-2"
+              >
+                &
+              </motion.span>
+              <br />
+              <motion.span
+                initial={{ opacity: 0, x: 100 }}
+                animate={{
+                  opacity: 1,
+                  x: 0,
+                  y: [0, -10, 5, -10, 5, 0]
+                }}
+                transition={{
+                  opacity: { duration: 0.8, ease: "easeOut", delay: 0.2 },
+                  x: { duration: 0.8, ease: "easeOut", delay: 0.2 },
+                  y: {
+                    duration: 0.6,
+                    delay: 5,
+                    repeat: Infinity,
+                    repeatDelay: 2.0
+                  }
+                }}
+                className="relative inline-block mb-5"
+              >
                 Knowledge
-                <div className="absolute -bottom-2 left-0 w-full h-1 bg-gray-900 dark:bg-white"></div>
-              </span>
+                <div className="absolute -bottom-5 left-0 w-full h-1 bg-gray-900 dark:bg-white"></div>
+              </motion.span>
             </Heading>
 
-            <Text className="text-xl sm:text-2xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed font-light">
-              A curated collection of thoughts and insights
-            </Text>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
+            >
+              <Text className="text-xl sm:text-2xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed font-light">
+                A curated collection of thoughts and insights
+              </Text>
+            </motion.div>
 
             {/* Stats with dashed separators */}
-            <div className="flex flex-wrap gap-8 justify-center items-center text-sm text-gray-600 dark:text-gray-400">
-              <div className="text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut", delay: 0.6 }}
+              className="flex flex-wrap gap-8 justify-center items-center text-sm text-gray-600 dark:text-gray-400"
+            >
+              <motion.div
+                className="text-center"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
                 <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
                   {loading ? (
                     <Loader2 className="h-8 w-8 animate-spin inline" />
@@ -95,9 +147,13 @@ export function LandingPage() {
                   )}
                 </div>
                 <div className="text-xs uppercase tracking-wider">Articles</div>
-              </div>
+              </motion.div>
               <div className="w-px h-12 border-l-2 border-dashed border-gray-300 dark:border-gray-700"></div>
-              <div className="text-center">
+              <motion.div
+                className="text-center"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
                 <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
                   {loading ? (
                     <Loader2 className="h-8 w-8 animate-spin inline" />
@@ -108,8 +164,8 @@ export function LandingPage() {
                 <div className="text-xs uppercase tracking-wider">
                   Categories
                 </div>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </section>
@@ -131,13 +187,44 @@ export function LandingPage() {
               <Loader2 className="h-8 w-8 animate-spin" />
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
-              {categories.map((category: Category) => {
+            <motion.div
+              className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.1,
+                  },
+                },
+              }}
+            >
+              {categories.map((category: Category, index: number) => {
                 const Icon = category.icon;
                 const href = `/${category.slug}`;
                 return (
-                  <Link key={category.id} href={href}>
-                    <div className="group relative h-full border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-10 hover:border-gray-900 dark:hover:border-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900 transition-all duration-300 cursor-pointer">
+                  <motion.div
+                    key={category.id}
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      visible: {
+                        opacity: 1,
+                        y: 0,
+                        transition: {
+                          duration: 0.5,
+                          ease: "easeOut",
+                        },
+                      },
+                    }}
+                  >
+                    <Link href={href}>
+                      <motion.div
+                        className="group relative h-full border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-10 hover:border-gray-900 dark:hover:border-gray-400 hover:bg-gray-50 dark:hover:bg-gray-900 transition-all duration-300 cursor-pointer"
+                        whileHover={{ y: -5 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      >
                       {/* Decorative corner accents */}
                       <div className="absolute top-3 left-3 w-8 h-8 border-t-2 border-l-2 border-gray-900 dark:border-white opacity-0 group-hover:opacity-100 transition-opacity"></div>
                       <div className="absolute bottom-3 right-3 w-8 h-8 border-b-2 border-r-2 border-gray-900 dark:border-white opacity-0 group-hover:opacity-100 transition-opacity"></div>
@@ -185,11 +272,12 @@ export function LandingPage() {
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </Link>
+                      </motion.div>
+                    </Link>
+                  </motion.div>
                 );
               })}
-            </div>
+            </motion.div>
           )}
         </div>
       </section>
@@ -197,14 +285,26 @@ export function LandingPage() {
       {/* CTA Section - Join Community */}
       <section className="border-t-2 border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 py-24 mt-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-lg p-8 sm:p-12 bg-white dark:bg-gray-950 text-center">
+          <motion.div
+            className="border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-lg p-8 sm:p-12 bg-white dark:bg-gray-950 text-center"
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            viewport={{ once: true, margin: "-100px" }}
+          >
             <Heading className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900 dark:text-white tracking-tight">
               Never Miss an Update
             </Heading>
             <Text className="text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-8 font-light">
               Create your account to get notifications for the latest articles and updates
             </Text>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <motion.div
+              className="flex flex-col sm:flex-row gap-4 justify-center"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+              viewport={{ once: true, margin: "-100px" }}
+            >
               <Link href="/auth/signup">
                 <Button
                   size="lg"
@@ -223,8 +323,8 @@ export function LandingPage() {
                   Sign In
                 </Button>
               </Link>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
     </div>
