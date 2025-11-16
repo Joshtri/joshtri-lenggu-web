@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button, Textarea, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, useDisclosure } from "@heroui/react";
 import { Send, LogIn } from "lucide-react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useCreateComment } from "@/services/commentsService";
 
@@ -15,6 +15,7 @@ interface CommentFormProps {
 
 export default function CommentForm({ postId, parentId, onSuccess }: CommentFormProps) {
   const { isSignedIn, userId } = useAuth();
+  const { user } = useUser();
   const router = useRouter();
   const [content, setContent] = useState("");
   const { mutate: createComment, isPending } = useCreateComment();
@@ -111,7 +112,20 @@ export default function CommentForm({ postId, parentId, onSuccess }: CommentForm
     <form onSubmit={handleSubmit} className="space-y-2">
       <div className="flex items-center justify-between">
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Commenting as <span className="font-medium text-gray-700 dark:text-gray-300">{userId}</span>
+          Commenting as{" "}
+          <span className="font-medium text-gray-700 dark:text-gray-300">
+            {user?.firstName && user?.lastName
+              ? `${user.firstName} ${user.lastName}`
+              : user?.firstName || user?.username || "User"}
+          </span>
+          {user?.emailAddresses?.[0]?.emailAddress && (
+            <>
+              {" "}
+              <span className="text-gray-500 dark:text-gray-400">
+                ({user.emailAddresses[0].emailAddress})
+              </span>
+            </>
+          )}
         </p>
       </div>
       <div className="relative">

@@ -13,3 +13,4 @@ export default async function ProfilePage() {
   // User profile/dashboard - no sidebar layout from (user)
   return <UserDashboard userEmail={email} />;
 }
+  

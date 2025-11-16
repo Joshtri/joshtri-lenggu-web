@@ -3,10 +3,11 @@
 import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
 import { BreadcrumbItem, Breadcrumbs, Button } from "@heroui/react";
-import { ArrowLeft, BookHeart, Code2, Zap, Palette, Search } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Type } from "../types/interfaces";
+import { iconMap } from "@/components/ui/customIcons";
 
 interface CategoryHeaderProps {
   type: Type;
@@ -15,15 +16,6 @@ interface CategoryHeaderProps {
   onSearchClick?: () => void;
 }
 
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  "personal-blog": BookHeart,
-  personal: BookHeart,
-  technology: Code2,
-  teknologi: Code2,
-  tutorial: Zap,
-  design: Palette,
-};
-
 export default function CategoryHeader({
   type,
   slug,
@@ -31,7 +23,7 @@ export default function CategoryHeader({
   onSearchClick,
 }: CategoryHeaderProps) {
   const router = useRouter();
-  const Icon = iconMap[slug] || BookHeart;
+  const Icon = iconMap[slug] || iconMap["personal-blog"];
 
   return (
     <section className="bg-white dark:bg-gray-950 border-b-2 border-dashed border-gray-300 dark:border-gray-700">
@@ -83,7 +75,7 @@ export default function CategoryHeader({
 
         <div className="flex items-start gap-6">
           <div className="inline-flex items-center justify-center w-24 h-24 border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-full flex-shrink-0">
-            <Icon className="h-12 w-12 text-gray-900 dark:text-white" />
+            <Icon className={slug === 'personal-blog' || slug === 'personal' ? 'h-20 w-20' : 'h-12 w-12 text-gray-900 dark:text-white'} />
           </div>
           <div>
             <Heading className="text-5xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">

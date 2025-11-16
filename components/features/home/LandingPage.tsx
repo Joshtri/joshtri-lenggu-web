@@ -1,11 +1,7 @@
 "use client";
 
-import { Card, CardBody } from "@heroui/react";
+import { Button, Card, CardBody, Input } from "@heroui/react";
 import {
-  BookHeart,
-  Code2,
-  Zap,
-  Palette,
   ArrowRight,
   Sparkles,
   Loader2,
@@ -13,6 +9,9 @@ import {
 import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { textToSlug } from "@/lib/slug";
+import { Heading } from "@/components/ui/Heading";
+import { Text } from "@/components/ui/Text";
+import { iconMap } from "@/components/ui/customIcons";
 
 interface TypeWithCount {
   id: string;
@@ -25,15 +24,6 @@ interface Category extends TypeWithCount {
   slug: string;
   icon: React.ComponentType<{ className?: string }>;
 }
-
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  "personal-blog": BookHeart,
-  personal: BookHeart,
-  technology: Code2,
-  teknologi: Code2,
-  tutorial: Zap,
-  design: Palette,
-};
 
 // Fetch function for TanStack Query
 const fetchTypes = async (): Promise<Category[]> => {
@@ -50,7 +40,7 @@ const fetchTypes = async (): Promise<Category[]> => {
     icon:
       iconMap[textToSlug(type.name)] ||
       iconMap[type.name.toLowerCase()] ||
-      BookHeart,
+      iconMap["personal-blog"],
   }));
 };
 
@@ -75,26 +65,28 @@ export function LandingPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-32 lg:py-40">
           <div className="text-center">
             {/* Decorative dashed box */}
+            {/* 
             <div className="inline-block mb-8">
-              {/* <div className="border-2 border-dashed border-gray-400 rounded-lg px-6 py-3">
+              <div className="border-2 border-dashed border-gray-400 rounded-lg px-6 py-3">
                 <div className="flex items-center gap-2 text-gray-700">
                   <Sparkles className="h-4 w-4" />
                    <span className="text-sm font-medium tracking-wide">WELCOME</span>
                 </div>
-              </div> */}
+              </div> 
             </div>
+              */}
 
-            <h1 className="text-6xl sm:text-7xl lg:tex  t-8xl font-bold mb-8 leading-none tracking-tight text-gray-900 dark:text-white">
+            <Heading className="text-6xl sm:text-7xl lg:tex  t-8xl font-bold mb-8 leading-none tracking-tight text-gray-900 dark:text-white">
               Stories &<br />
               <span className="relative inline-block">
                 Knowledge
                 <div className="absolute -bottom-2 left-0 w-full h-1 bg-gray-900 dark:bg-white"></div>
               </span>
-            </h1>
+            </Heading>
 
-            <p className="text-xl sm:text-2xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed font-light">
+            <Text className="text-xl sm:text-2xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed font-light">
               A curated collection of thoughts and insights
-            </p>
+            </Text>
 
             {/* Stats with dashed separators */}
             <div className="flex flex-wrap gap-8 justify-center items-center text-sm text-gray-600 dark:text-gray-400">
@@ -130,12 +122,12 @@ export function LandingPage() {
       <section className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         <div>
           <div className="text-center mb-20">
-            <h2 className="text-5xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
+            <Heading className="text-5xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
               Choose Your Path
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 font-light">
+            </Heading>
+            <Text className="text-lg text-gray-600 dark:text-gray-400 font-light">
               Browse through different categories
-            </p>
+            </Text>
           </div>
 
           {loading ? (
@@ -157,20 +149,24 @@ export function LandingPage() {
                       <div className="flex flex-col h-full">
                         {/* Icon */}
                         <div className="mb-6">
-                          <div className="inline-flex items-center justify-center w-16 h-16 border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-full group-hover:border-gray-900 dark:group-hover:border-white group-hover:rotate-90 transition-all duration-300">
-                            <Icon className="h-7 w-7 text-gray-900 dark:text-white" />
+                          <div className={`inline-flex items-center justify-center w-16 h-16 border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-full group-hover:border-gray-900 dark:group-hover:border-white transition-all duration-300 ${
+                            category.slug === 'personal-blog' || category.slug === 'personal'
+                              ? 'group-hover:scale-110'
+                              : 'group-hover:rotate-90'
+                          }`}>
+                            <Icon className={category.slug === 'personal-blog'  ? 'h-14 w-14' : 'h-7 w-7 text-gray-900 dark:text-white'} />
                           </div>
                         </div>
 
                         {/* Content */}
-                        <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
+                        <Heading className="text-3xl font-bold text-gray-900 dark:text-white mb-4 tracking-tight">
                           {category.name}
-                        </h3>
+                        </Heading>
 
-                        <p className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed font-light flex-grow">
+                        <Text className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed font-light flex-grow">
                           {category.description ||
                             "Explore articles in this category"}
-                        </p>
+                        </Text>
 
                         {/* Footer */}
                         <div className="flex items-center justify-between pt-6 border-t-2 border-dashed border-gray-200 dark:border-gray-700">
@@ -197,21 +193,21 @@ export function LandingPage() {
       <section className="border-t-2 border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 py-24 mt-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-lg p-12 bg-white dark:bg-gray-950 text-center">
-            <h2 className="text-4xl font-bold mb-4 text-gray-900 dark:text-white tracking-tight">
+            <Heading className="text-4xl font-bold mb-4 text-gray-900 dark:text-white tracking-tight">
               Stay Updated
-            </h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 mb-10 font-light">
+            </Heading>
+            <Text className="text-lg text-gray-600 dark:text-gray-400 mb-10 font-light">
               Get the latest articles delivered to your inbox
-            </p>
+            </Text>
             <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-lg mx-auto">
-              <input
+              <Input
                 type="email"
                 placeholder="your@email.com"
                 className="px-6 py-4 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:border-gray-900 dark:focus:border-white flex-1 font-light bg-white dark:bg-gray-950"
               />
-              <button className="px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors border-2 border-gray-900 dark:border-white">
+              <Button className="px-8 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium rounded-lg hover:bg-gray-800 dark:hover:bg-gray-200 transition-colors border-2 border-gray-900 dark:border-white">
                 Subscribe
-              </button>
+              </Button>
             </div>
           </div>
         </div>
