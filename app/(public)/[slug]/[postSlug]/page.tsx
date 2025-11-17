@@ -29,11 +29,11 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
     };
   }
 
-  // Find post by slug and typeId
+  // Find post by slug and typeId (only published posts)
   const post = await db
     .select()
     .from(posts)
-    .where(and(eq(posts.slug, postSlug), eq(posts.typeId, type.id)))
+    .where(and(eq(posts.slug, postSlug), eq(posts.typeId, type.id), eq(posts.status, 'published')))
     .limit(1);
 
   if (post.length === 0) {
@@ -110,22 +110,22 @@ export default async function PostPage({ params }: PostPageProps) {
     notFound();
   }
 
-  // Find post by slug and typeId
+  // Find post by slug and typeId (only published posts)
   const post = await db
     .select()
     .from(posts)
-    .where(and(eq(posts.slug, postSlug), eq(posts.typeId, type.id)))
+    .where(and(eq(posts.slug, postSlug), eq(posts.typeId, type.id), eq(posts.status, 'published')))
     .limit(1);
 
   if (post.length === 0) {
     notFound();
   }
 
-  // Fetch more from category posts sorted by views (excluding current post)
+  // Fetch more from category posts sorted by views (excluding current post, only published)
   const moreFromCategory = await db
     .select()
     .from(posts)
-    .where(and(eq(posts.typeId, type.id), ne(posts.id, post[0].id)))
+    .where(and(eq(posts.typeId, type.id), ne(posts.id, post[0].id), eq(posts.status, 'published')))
     .orderBy(desc(posts.viewsCount))
     .limit(6);
 
