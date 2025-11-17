@@ -60,33 +60,58 @@ export default function TableOfContents() {
     };
   }, []);
 
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    const element = document.getElementById(id);
+    if (element) {
+      const offset = 100;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+
+      // Update URL without page reload
+      window.history.pushState(null, "", `#${id}`);
+    }
+  };
+
   if (toc.length === 0) return null;
 
   return (
-    <Card className="sticky top-32">
-      <CardHeader>
-        <Heading className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
+    <Card className="sticky top-32 w-52">
+      <CardHeader className="pb-3">
+        <Heading className="text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-wider">
           Table of Contents
         </Heading>
       </CardHeader>
-      <CardBody>
-        <nav className="space-y-2">
-          {toc.map((item) => (
-            <a
-              key={item.id}
-              href={`#${item.id}`}
-              className={`block text-sm transition-colors ${
-                item.level === 1 ? "pl-0" : `pl-${(item.level - 1) * 4}`
-              } ${
-                activeId === item.id
-                  ? "text-blue-600 dark:text-blue-400 font-medium"
-                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
-              }`}
-              style={{ paddingLeft: `${(item.level - 1) * 0.75}rem` }}
-            >
-              {item.text}
-            </a>
-          ))}
+      <CardBody className="pt-0 px-2">
+        <nav>
+          <ul className="space-y-2">
+            {toc.map((item) => (
+              <li
+                key={item.id}
+                className="list-disc ml-3"
+                style={{ 
+                  marginLeft: `${item.level * 0.8}rem`,
+                }}
+              >
+                <a
+                  href={`#${item.id}`}
+                  onClick={(e) => handleClick(e, item.id)}
+                  className={`text-xs transition-colors cursor-pointer line-clamp-2 leading-relaxed ${
+                    activeId === item.id
+                      ? "text-blue-600 dark:text-blue-400 font-medium"
+                      : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                  }`}
+                >
+                  {item.text}
+                </a>
+              </li>
+            ))}
+          </ul>
         </nav>
       </CardBody>
     </Card>

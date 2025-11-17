@@ -4,7 +4,7 @@ import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
 import { BreadcrumbItem, Breadcrumbs, Button } from "@heroui/react";
 import { ArrowLeft, Calendar, Clock, Eye } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 
 interface Type {
@@ -35,6 +35,20 @@ export default function PostReadHeader({
   viewsCount = 0,
 }: PostReadHeaderProps) {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const handleBack = () => {
+    // Remove hash and get the base path
+    const pathWithoutHash = pathname.split('#')[0];
+    const pathSegments = pathWithoutHash.split('/').filter(Boolean);
+    
+    // Navigate to category page (remove the post slug)
+    if (pathSegments.length > 1) {
+      router.push(`/${pathSegments[0]}`);
+    } else {
+      router.back();
+    }
+  };
 
   return (
     <section className="bg-white dark:bg-gray-950 border-b-2 border-dashed border-gray-300 dark:border-gray-700">
@@ -43,7 +57,7 @@ export default function PostReadHeader({
           <Button
             isIconOnly
             variant="light"
-            onPress={() => router.back()}
+            onPress={handleBack}
             className="text-gray-900 dark:text-gray-100"
           >
             <ArrowLeft className="h-5 w-5" />

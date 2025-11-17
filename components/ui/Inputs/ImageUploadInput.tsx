@@ -113,7 +113,7 @@ export function ImageUploadInput({
             size="sm"
             color="danger"
             variant="flat"
-            className="absolute top-2 right-2"
+            className="absolute top-2 right-2 z-[9999]"
             onPress={handleRemove}
           >
             <X className="h-4 w-4" />

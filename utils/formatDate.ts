@@ -10,7 +10,7 @@ export function formatPostDate(date?: string | number | Date): string {
 
     try {
         return format(new Date(date), "MMM d, yyyy"); // e.g. "Nov 10, 2025"
-    } catch (error) {
+    } catch (_error) {
         console.error("Invalid date provided to formatPostDate:", date);
         return "";
     }

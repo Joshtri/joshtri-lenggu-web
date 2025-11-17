@@ -6,8 +6,10 @@ import { Button, Card, CardBody } from "@heroui/react";
 import { useTrackPostView } from "@/services/postViewsService";
 import { Text } from "@/components/ui/Text";
 import { Heading } from "@/components/ui/Heading";
+import { addHeadingIds } from "@/lib/addHeadingIds";
 import PostReadHeader from "./PostReadHeader";
 import TableOfContents from "./TableOfContents";
+import ResponsiveCoverImage from "./ResponsiveCoverImage";
 import CommentsSection from "@/components/features/comments/CommentsSection";
 import ShareButtons from "./ShareButtons";
 import TagsList from "./TagsList";
@@ -100,24 +102,14 @@ export default function PostReadView({
 
       {/* Cover Image */}
       {post.coverImage && (
-        <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-          <div className="relative w-full h-48 sm:h-64 md:h-80 lg:h-96 overflow-hidden rounded-lg">
-            <Image
-              src={post.coverImage}
-              alt={post.title}
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
-        </div>
+        <ResponsiveCoverImage src={post.coverImage} alt={post.title} priority />
       )}
 
       {/* Main Content with Sidebars */}
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-8">
           {/* Left Sidebar - Desktop Only */}
-          <aside className="hidden lg:flex lg:flex-col lg:items-center w-24 shrink-0">
+          <aside className="hidden lg:flex lg:flex-col lg:items-center lg:w-28 xl:w-28 shrink-0">
             <div className="w-full sticky top-24">
               <div className="p-2">
                 <ShareButtons title={post.title} url={currentUrl} />
@@ -126,7 +118,7 @@ export default function PostReadView({
           </aside>
 
           {/* Main Article Content */}
-          <section className="flex-1 w-full max-w-full lg:max-w-6xl lg:mx-auto">
+          <section className="flex-1 w-full max-w-full lg:max-w-7xl lg:mx-auto">
             {/* AI Summarize - Mobile & Tablet */}
             <div className="lg:hidden mb-4 sm:mb-6 flex justify-start sm:justify-end">
               <div className="w-full sm:w-auto">
@@ -139,7 +131,7 @@ export default function PostReadView({
                 <article className="prose prose-sm sm:prose-base lg:prose-lg dark:prose-invert max-w-none">
                   <div
                     className="text-gray-800 dark:text-gray-200 leading-relaxed text-sm sm:text-base"
-                    dangerouslySetInnerHTML={{ __html: post.content }}
+                    dangerouslySetInnerHTML={{ __html: addHeadingIds(post.content) }}
                   />
                 </article>
               </CardBody>
@@ -152,7 +144,7 @@ export default function PostReadView({
           </section>
 
           {/* Right Sidebar - Desktop Only */}
-          <aside className="hidden lg:block w-full lg:w-64 ml-4 xl:w-80 shrink-0">
+          <aside className="hidden lg:block w-full lg:w-28 ml-4 xl:w-28 shrink-0">
             <div className="space-y-4 lg:space-y-6 sticky top-24">
               {/* AI Summarize */}
               <div className="w-full">
@@ -160,11 +152,7 @@ export default function PostReadView({
               </div>
 
               {/* Table of Contents */}
-              {/* <Card>
-                <CardBody className="p-3 lg:p-4"> */}
               <TableOfContents />
-              {/* </CardBody>
-              </Card> */}
 
               {/* Related Posts */}
               {relatedPosts.length > 0 && (
