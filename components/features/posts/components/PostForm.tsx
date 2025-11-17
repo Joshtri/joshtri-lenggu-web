@@ -29,6 +29,7 @@ type PostFormData = {
   coverImage: string | File;
   content: string;
   excerpt: string;
+  status: 'draft' | 'published' | 'archived';
   authorId?: number;
   labelId?: string;
   typeId?: string;
@@ -60,6 +61,7 @@ export default function PostForm({ mode, postId }: PostFormProps) {
       coverImage: "",
       content: "",
       excerpt: "",
+      status: "published",
       labelId: "",
       typeId: "",
     },
@@ -96,6 +98,7 @@ export default function PostForm({ mode, postId }: PostFormProps) {
         coverImage: post.coverImage,
         content: post.content,
         excerpt: post.excerpt,
+        status: post.status || "published",
         labelId: post.labelId?.toString() || "",
         typeId: post.typeId?.toString() || "",
       });
@@ -218,6 +221,7 @@ export default function PostForm({ mode, postId }: PostFormProps) {
         coverImage: coverImageUrl,
         content: latestContent,
         excerpt: data.excerpt,
+        status: data.status,
         labelId: data.labelId as unknown as string,
         typeId: data.typeId as unknown as string,
       };
