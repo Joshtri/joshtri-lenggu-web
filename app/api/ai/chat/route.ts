@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Starting chat stream with gemini-2.0-flash...');
+    // console.log('Starting chat stream with gemini-2.0-flash...');
 
     // Convert messages to the proper format for the AI SDK
     const coreMessages = convertToCoreMessages(messages);
@@ -33,9 +33,9 @@ export async function POST(request: NextRequest) {
       onError: ({ error }) => {
         console.error('StreamText error:', error);
       },
-      onFinish: ({ usage, finishReason }) => {
-        console.log('Chat completion finished', { usage, finishReason });
-      },
+      // onFinish: ({ usage, finishReason }) => {
+      //   console.log('Chat completion finished', { usage, finishReason });
+      // },
     });
 
     return result.toTextStreamResponse();
