@@ -24,19 +24,19 @@ export async function POST(request: NextRequest) {
     // Create a detailed prompt for better summarization
     const prompt = `You are an expert at creating concise, informative article summaries.
 
-Article Title: ${title || 'Untitled'}
+      Article Title: ${title || 'Untitled'}
 
-Article Content:
-${plainText.substring(0, 8000)} ${plainText.length > 8000 ? '...' : ''}
+      Article Content:
+      ${plainText.substring(0, 8000)} ${plainText.length > 8000 ? '...' : ''}
 
-Task: Create a comprehensive yet concise summary of this article. Your summary should:
-1. Capture the main topic and key points
-2. Be written in clear, easy-to-understand language
-3. Be 3-5 paragraphs long
-4. Include the most important insights and conclusions
-5. Be helpful for someone deciding whether to read the full article
+      Task: Create a comprehensive yet concise summary of this article. Your summary should:
+      1. Capture the main topic and key points
+      2. Be written in clear, easy-to-understand language
+      3. Be 3-5 paragraphs long
+      4. Include the most important insights and conclusions
+      5. Be helpful for someone deciding whether to read the full article
 
-Write the summary now:`;
+      Write the summary now:`;
 
     const { text } = await generateText({
       model: google('gemini-2.0-flash'),
