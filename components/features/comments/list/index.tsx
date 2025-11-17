@@ -46,7 +46,7 @@ export default function CommentList() {
         title="Comment Lists"
         resourcePath="/comments"
         columns={columns}
-        onSearch={(query) => {}}
+        onSearch={(_query) => {}}
         actionButtons={{
           delete: ACTION_BUTTONS.DELETE(handleDelete),
         }}

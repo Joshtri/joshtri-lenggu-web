@@ -8,7 +8,7 @@ import {
 } from "@/services/userSyncService";
 
 export async function POST(req: Request) {
-  console.log("🔔 Webhook received!");
+  // console.log("🔔 Webhook received!");
 
   // Get the Svix headers for verification
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
       "svix-signature": svix_signature,
     }) as WebhookEvent;
     // console.log("✅ Signature verified!");
-  } catch (err) {
+  } catch (_err) {
     // console.error("❌ Webhook verification failed:", err);
     return new Response("Error: Verification failed", {
       status: 400,
@@ -85,12 +85,12 @@ export async function POST(req: Request) {
         await deleteUserFromDatabase(clerkUserId as string);
       }
 
-      console.log(`✅ User ${clerkUserId} deleted successfully`);
+      // console.log(`✅ User ${clerkUserId} deleted successfully`);
     }
 
     // console.log("✅ Webhook processed successfully");
     return new Response("Webhook processed successfully", { status: 200 });
-  } catch (error) {
+  } catch (_error) {
     // console.error("❌ Error processing webhook:", error);
     // console.error("Full error:", error);
     return new Response("Error processing webhook", { status: 500 });

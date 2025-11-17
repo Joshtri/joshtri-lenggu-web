@@ -7,6 +7,12 @@ import { ArrowLeft, Calendar, Clock, Eye } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 
+interface Label {
+  id: string;
+  name: string;
+  color: string;
+}
+
 interface Type {
   id: string;
   name: string;
@@ -20,6 +26,7 @@ interface Post {
 interface PostReadHeaderProps {
   post: Post;
   type: Type;
+  label?: Label | null;
   slug: string;
   formattedDate: string;
   readingTime: number;
@@ -29,6 +36,7 @@ interface PostReadHeaderProps {
 export default function PostReadHeader({
   post,
   type,
+  label,
   slug,
   formattedDate,
   readingTime,
@@ -41,7 +49,7 @@ export default function PostReadHeader({
     // Remove hash and get the base path
     const pathWithoutHash = pathname.split('#')[0];
     const pathSegments = pathWithoutHash.split('/').filter(Boolean);
-    
+
     // Navigate to category page (remove the post slug)
     if (pathSegments.length > 1) {
       router.push(`/${pathSegments[0]}`);
@@ -95,6 +103,16 @@ export default function PostReadHeader({
 
         {/* Meta Info */}
         <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600 dark:text-gray-400">
+          {label && (
+            <div className="flex items-center gap-2">
+              <span
+                className="inline-block px-3 py-1 rounded-full text-xs font-medium text-white"
+                style={{ backgroundColor: label.color }}
+              >
+                {label.name}
+              </span>
+            </div>
+          )}
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4" />
             <span>{formattedDate}</span>

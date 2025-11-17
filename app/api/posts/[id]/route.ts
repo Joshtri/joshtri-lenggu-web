@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { posts, comments, postViews } from "@/db/schema";
+import { posts, comments, postViews, labels } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 
 // GET - Fetch single post by ID
@@ -35,8 +35,15 @@ export async function GET(
         createdAt: posts.createdAt,
         updatedAt: posts.updatedAt,
         viewsCount: posts.viewsCount,
+        label: {
+          id: labels.id,
+          name: labels.name,
+          color: labels.color,
+          description: labels.description,
+        },
       })
       .from(posts)
+      .leftJoin(labels, eq(posts.labelId, labels.id))
       .where(eq(posts.id, id))
       .limit(1);
 

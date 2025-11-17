@@ -1,5 +1,12 @@
 import { BaseEntity } from "@/interfaces/api";
 
+export interface Label {
+    id: string;
+    name: string;
+    color: string;
+    description?: string | null;
+}
+
 export interface Post  extends BaseEntity{
     slug: string;
     title: string;
@@ -11,6 +18,7 @@ export interface Post  extends BaseEntity{
     authorId: string | null;
     labelId: string | null;
     typeId: string | null;
+    label?: Label | null;
 }
 
 export interface CreatePostInput extends Pick<BaseEntity, "id"> {

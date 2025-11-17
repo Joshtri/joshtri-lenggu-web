@@ -201,7 +201,7 @@ export function LandingPage() {
                 },
               }}
             >
-              {categories.map((category: Category, index: number) => {
+              {categories.map((category: Category, _index: number) => {
                 const Icon = category.icon;
                 const href = `/${category.slug}`;
                 return (
@@ -255,7 +255,7 @@ export function LandingPage() {
                           {category.name}
                         </Heading>
 
-                        <Text className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed font-light flex-grow">
+                        <Text className="text-gray-600 dark:text-gray-400 mb-8 leading-relaxed font-light grow">
                           {category.description ||
                             "Explore articles in this category"}
                         </Text>

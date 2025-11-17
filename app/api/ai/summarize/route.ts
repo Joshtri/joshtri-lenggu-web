@@ -16,27 +16,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log('Summarizing article with gemini-2.5-flash...');
-
     // Strip HTML tags from content for better summarization
     const plainText = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 
     // Create a detailed prompt for better summarization
-    const prompt = `You are an expert at creating concise, informative article summaries.
+    const prompt = `Anda adalah seorang ahli dalam membuat ringkasan artikel yang ringkas, informatif, dan akurat.
 
-      Article Title: ${title || 'Untitled'}
+    Judul Artikel: ${title || 'Tanpa Judul'}
 
-      Article Content:
-      ${plainText.substring(0, 8000)} ${plainText.length > 8000 ? '...' : ''}
+    Konten Artikel:
+    ${plainText.substring(0, 8000)} ${plainText.length > 8000 ? '...' : ''}
 
-      Task: Create a comprehensive yet concise summary of this article. Your summary should:
-      1. Capture the main topic and key points
-      2. Be written in clear, easy-to-understand language
-      3. Be 3-5 paragraphs long
-      4. Include the most important insights and conclusions
-      5. Be helpful for someone deciding whether to read the full article
+    Tugas: Buat ringkasan artikel ini yang komprehensif namun ringkas. Ringkasan Anda harus:
+    1. Mencakup topik utama dan poin-poin kunci.
+    2. Ditulis dalam bahasa yang jelas dan mudah dipahami (Bahasa Indonesia).
+    3. Terdiri dari 3-5 paragraf.
+    4. Mencakup wawasan dan kesimpulan yang paling penting.
+    5. Bermanfaat bagi pembaca yang ingin memutuskan apakah akan membaca artikel lengkapnya.
 
-      Write the summary now:`;
+    Tulis ringkasan tersebut sekarang:`;
 
     const { text } = await generateText({
       model: google('gemini-2.0-flash'),
@@ -45,7 +43,6 @@ export async function POST(request: NextRequest) {
       // maxTokens: 500,
     });
 
-    console.log('Article summarized successfully');
 
     return NextResponse.json(
       {
@@ -56,7 +53,6 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Summarize API error:', error);
 
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 

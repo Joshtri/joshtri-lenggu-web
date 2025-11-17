@@ -18,6 +18,13 @@ import AISummarize from "./AISummarize";
 import ReadingProgressBar from "./ReadingProgressBar";
 import MoreFromCategory from "./MoreFromCategory";
 
+interface Label {
+  id: string;
+  name: string;
+  color: string;
+  description?: string | null;
+}
+
 interface Type {
   id: string;
   name: string;
@@ -33,6 +40,7 @@ interface Post {
   createdAt: Date | null;
   viewsCount?: number;
   tags?: string[];
+  label?: Label | null;
 }
 
 interface RelatedPost {
@@ -94,6 +102,7 @@ export default function PostReadView({
       <PostReadHeader
         post={post}
         type={type}
+        label={post.label}
         slug={slug}
         formattedDate={formattedDate}
         readingTime={readingTime}

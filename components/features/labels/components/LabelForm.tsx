@@ -161,7 +161,7 @@ export default function LabelForm({ mode, labelId }: LabelFormProps) {
             <div className="lg:col-span-2 space-y-6">
               {/* Label Information Card */}
               <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-                <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-750 border-b border-gray-200 dark:border-gray-700">
+                <div className="p-4 bg-linear-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-750 border-b border-gray-200 dark:border-gray-700">
                   <Text className="text-lg font-semibold flex items-center gap-2 text-gray-900 dark:text-white">
                     <Tag className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                     Label Information

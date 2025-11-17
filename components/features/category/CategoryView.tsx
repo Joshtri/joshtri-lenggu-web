@@ -77,6 +77,17 @@ export default function CategoryView({ type, posts, slug }: CategoryViewProps) {
                         fill
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
+                      {/* Label Badge - Positioned over image */}
+                      {post.label && (
+                        <div className="absolute top-3 left-3">
+                          <span
+                            className="inline-block px-3 py-1 rounded-full text-xs font-medium text-white"
+                            style={{ backgroundColor: post.label.color }}
+                          >
+                            {post.label.name}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </Link>
                 )}
