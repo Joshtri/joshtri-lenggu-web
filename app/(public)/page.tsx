@@ -6,7 +6,7 @@ import { generateWebsiteSchema } from "@/lib/schema";
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {
-  title: "Joshtri Lenggu Blog - Language Learning & Technology",
+  title: "Joshtri Lenggu",
   description:
     "Explore articles about language learning, technology, and personal development. A blog dedicated to helping you learn and grow.",
   keywords: "blog, language learning, technology, programming, education",
@@ -16,19 +16,19 @@ export const metadata: Metadata = {
     description: "A blog about language learning and technology",
     type: "website",
     url: BASE_URL,
-    siteName: "Joshtri Lenggu Blog",
+    siteName: "Joshtri Lenggu",
     images: [
       {
         url: `${BASE_URL}/og-image.jpg`,
         width: 1200,
         height: 630,
-        alt: "Joshtri Lenggu Blog",
+        alt: "Joshtri Lenggu",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Joshtri Lenggu Blog",
+    title: "Joshtri Lenggu",
     description: "A blog about language learning and technology",
     images: [`${BASE_URL}/og-image.jpg`],
   },
